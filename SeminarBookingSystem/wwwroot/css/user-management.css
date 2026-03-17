@@ -1,0 +1,193 @@
+/* File path: SeminarBookingSystem/wwwroot/css/user-management.css */
+:root {
+    --primary-black: #0f172a;
+    --border-gray: #e2e8f0;
+    --text-muted: #64748b;
+    --blue-bg: #eff6ff;
+    --blue-border: #dbeafe;
+    --blue-text: #2563eb;
+}
+
+.main-content {
+    display: flex;
+    margin-top: 70px; /* space for fixed header */
+    height: calc(100vh - 70px);
+}
+
+.content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 50px;
+    background-color: #f3f3f5;
+}
+
+.management-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 0 50px;
+    
+}
+
+/* Header */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.page-header h1 { font-size: 24px; margin: 0; }
+.page-header p { color: var(--text-muted); margin: 5px 0 0 0; }
+
+.btn-primary {
+    background: var(--primary-black);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* Alert Box */
+.alert-box {
+    background: var(--blue-bg);
+    border: 1px solid var(--blue-border);
+    border-radius: 12px;
+    padding: 15px 20px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-bottom: 20px;
+    color: var(--blue-text);
+}
+
+.pwd-highlight { background: #dbeafe; padding: 2px 4px; border-radius: 4px; }
+
+/* Filter Bar */
+.filter-bar {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding: 20px;
+    background-color: white;
+    border: 1px solid var(--border-gray);
+}
+
+.search-wrapper {
+    flex: 1;
+    position: relative;
+    background: #f3f3f5;
+    border: 1px solid var(--border-gray);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
+}
+
+.search-wrapper input {
+    border: none;
+    padding: 12px;
+    width: 100%;
+    outline: none;
+    background: #f3f3f5;
+}
+.search-wrapper:active, .search-wrapper:focus-within {
+    border-color: #a1a1a1;
+    box-shadow: 0 0 0 3px rgba(161, 161, 161, 0.2);
+}
+
+.role-select {
+    /* width: 400px; */
+    flex: 1;
+    border: 1px solid var(--border-gray);
+    border-radius: 10px;
+    padding: 0 15px;
+    color: var(--text-muted);
+    background: #f3f3f5;
+}
+
+/* Table Card */
+.table-card {
+    background: white;
+    border: 1px solid var(--border-gray);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.table-header h3 { margin: 0; font-size: 16px; }
+.table-header p { color: var(--text-muted); font-size: 14px; margin-top: 5px; }
+
+.user-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.user-table th {
+    text-align: left;
+    color: var(--text-muted);
+    font-size: 13px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-gray);
+}
+
+.user-table td { padding: 15px 0; font-size: 14px; border-bottom: 1px dotted var(--border-gray); }
+
+.badge-you {
+    background: #f1f5f9;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    margin-left: 8px;
+}
+
+.role-badge {
+    background: #f5f3ff;
+    color: #7c3aed;
+    padding: 4px 4px 10px 0;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.icon-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 5px; }
+.icon-btn.delete { color: #f87171; }
+
+/* Summary Grid */
+.summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.summary-card {
+    background: white;
+    border: 1px solid var(--border-gray);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.summary-card .count { font-size: 32px; font-weight: bold; color: #a855f7; display: block; }
+.summary-card .count.blue { color: #3b82f6; }
+.summary-card i { font-size: 40px; opacity: 0.15; }
+
+.user-name i{
+    margin-left: 8px;
+    color: #7c3aed;
+}
+.user-name {
+    font-weight: bold;
+}
+.edit, .delete {
+    padding: 8px;
+    border-radius: 7px;
+    font-size: 18px;
+}
+.edit:hover, .delete:hover {
+    background-color: #f3f3f5;
+}

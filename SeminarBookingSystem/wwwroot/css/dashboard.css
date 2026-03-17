@@ -12,6 +12,7 @@
     flex: 1;
     overflow-y: auto; /* scrollable */
     padding: 0 50px;  /* optional padding */
+    background-color: #f3f3f5;
 }
 
 /* WHOLE CONTAINER INSIDE CONTENT */

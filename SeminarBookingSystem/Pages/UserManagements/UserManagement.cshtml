@@ -1,0 +1,92 @@
+﻿@* File Path: SeminarBookingSystem/Pages/UserManagements/UserManagement.cshtml *@
+@page "/UserManagement"
+@model SeminarBookingSystem.Pages.UserManagement.UserManagementModel
+@{
+    Layout = "_MainLayout";
+    ViewData["Title"] = "User Management";
+}
+<link rel="stylesheet" href="~/css/user-management.css" asp-append-version="true" />
+
+<div class="management-container">
+    <header class="page-header">
+        <div class="header-text">
+            <h1>User Management</h1>
+            <p>Manage admin users and permissions</p>
+        </div>
+        <button class="btn-primary">+ Add Admin User</button>
+    </header>
+
+    <div class="alert-box">
+        <i class="bi bi-shield"></i>
+        <div class="alert-content">
+            <strong>Super Admin Privileges</strong>
+            <p>Only Super Admins can create, edit, and delete admin users. All new users will have the default password:
+                <code class="pwd-highlight">admin123</code></p>
+            </div>
+        </div>
+
+        <div class="filter-bar">
+            <div class="search-wrapper">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Search users...">
+            </div>
+            <select class="role-select">
+                <option>All Roles</option>
+                <option>Super Admin</option>
+                <option>Staff Admin</option>
+            </select>
+        </div>
+
+        <div class="table-card">
+            <div class="table-header">
+                <h3>Admin Users</h3>
+                <p>1 user</p>
+            </div>
+            <table class="user-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Created At</th>
+                        <th class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="user-name">
+                                <i class="bi bi-shield"></i>
+                                Super Admin
+                                <span class="badge-you">You</span>
+                            </div>
+                        </td>
+                        <td>admin@seminar.com</td>
+                        <td><span class="role-badge">super admin</span></td>
+                        <td>Mar 17, 2026</td>
+                        <td class="text-right actions">
+                            <button class="icon-btn edit"><i class="fa-regular fa-pen-to-square"></i></button>
+                            <button class="icon-btn delete"><i class="fa-regular fa-trash-can"></i></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="summary-grid">
+            <div class="summary-card">
+                <div class="card-info">
+                    <p>Super Admins</p>
+                    <span class="count">1</span>
+                </div>
+                <i class="bi bi-shield"></i>
+            </div>
+            <div class="summary-card">
+                <div class="card-info">
+                    <p>Staff Admins</p>
+                    <span class="count blue">0</span>
+                </div>
+                <i class="fa-solid fa-users-gear settings-icon"></i>
+            </div>
+        </div>
+    </div>

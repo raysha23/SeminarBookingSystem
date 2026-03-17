@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Pages\UserManagement\" />
     <Folder Include="Pages\Participants\" />
     <Folder Include="Pages\Seminars\" />
   </ItemGroup>
