@@ -1,0 +1,122 @@
+﻿@* File Path: SeminarBookingSystem/Pages/Dashboard.cshtml *@
+@page
+@model DashboardModel
+@{
+    Layout = "_MainLayout";
+    ViewData["Title"] = "Dashboard";
+}
+<link rel="stylesheet" href="~/css/dashboard.css" />
+<div class="whole-container">
+    <header class="dashboard-header">
+        <h1>Dashboard</h1>
+        <p>Welcome back, Super Admin</p>
+    </header>
+
+    <div class="cards-container">
+        <div class="card">
+            <div class="card-text">
+                <h3>Total Seminars</h3>
+                <span class="stat-number">3</span>
+                <p class="stat-detail">3 upcoming</p>
+            </div>
+            <div class="card-icon blue"><i class="bi bi-calendar"></i></div>
+        </div>
+
+        <div class="card">
+            <div class="card-text">
+                <h3>Total Bookings</h3>
+                <span class="stat-number">3</span>
+                <p class="stat-detail">222 slots available</p>
+            </div>
+            <div class="card-icon green"><i class="fa-solid fa-calendar-check"></i></div>
+        </div>
+
+        <div class="card">
+            <div class="card-text">
+                <h3>Participants</h3>
+                <span class="stat-number">3</span>
+                <p class="stat-detail">Active participants</p>
+            </div>
+            <div class="card-icon purple"><i class="fa-solid fa-users"></i></div>
+        </div>
+
+        <div class="card">
+            <div class="card-text">
+                <h3>Activities</h3>
+                <span class="stat-number">0</span>
+                <p class="stat-detail">Total admin actions</p>
+            </div>
+            <div class="card-icon orange"><i class="bi bi-activity"></i></div>
+        </div>
+    </div>
+
+    <div class="bottom-grid">
+        <section class="content-section">
+            <div class="section-header">
+                <h2>Upcoming Seminars</h2>
+                <p>Next scheduled events</p>
+            </div>
+            <div class="scrollable-content">
+
+                <div class="seminar-list">
+                    <div class="seminar-item">
+                        <div class="seminar-info">
+                            <h4>Digital Marketing Strategies 2026</h4>
+                            <p class="location">Grand Conference Hall, Building A</p>
+                            <p class="date">Apr 15, 2026</p>
+                        </div>
+                        <div class="seminar-meta">
+                            <span class="badge">upcoming</span>
+                            <p class="booked">2/100 booked</p>
+                        </div>
+                    </div>
+
+                    <div class="seminar-item">
+                        <div class="seminar-info">
+                            <h4>Leadership and Team Management</h4>
+                            <p class="location">Room 205, Training Center</p>
+                            <p class="date">Mar 20, 2026</p>
+                        </div>
+                        <div class="seminar-meta">
+                            <span class="badge">upcoming</span>
+                            <p class="booked">1/50 booked</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="section-header">
+                <h2>Recent Activity</h2>
+                <p>Latest admin actions</p>
+            </div>
+            <div class="empty-state">
+                <p>No recent activity</p>
+            </div>
+        </section>
+    </div>
+    <div class="quick-actions-section">
+        <div class="section-header">
+            <h3>Quick Actions</h3>
+            <p>Common tasks</p>
+        </div>
+
+        <div class="quick-actions-grid">
+            <button class="action-btn">
+                <i class="fa-regular fa-calendar-plus"></i>
+                <span>Create Seminar</span>
+            </button>
+
+            <button class="action-btn">
+                <i class="fa-solid fa-user-plus"></i>
+                <span>Add Participant</span>
+            </button>
+
+            <button class="action-btn">
+                <i class="fa-solid fa-pulse"></i>
+                <span>View Logs</span>
+            </button>
+        </div>
+    </div>
+</div>
