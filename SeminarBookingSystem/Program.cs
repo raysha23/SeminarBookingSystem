@@ -1,7 +1,10 @@
+// File Path: SeminarBookingSystem/Program.cs
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using SeminarBookingSystem.Areas.Identity.Data;
 using SeminarBookingSystem.Data;
 using SeminarBookingSystem.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("SeminarBookingSystemContextConnection") ?? throw new InvalidOperationException("Connection string 'SeminarBookingSystemContextConnection' not found.");
 
@@ -30,9 +33,16 @@ app.UseRouting();
 app.UseAuthorization();
 app.MapGet("/", context =>
 {
-  context.Response.Redirect("/Dashboard");
+  context.Response.Redirect("/Login");
   return Task.CompletedTask;
 });
 app.MapRazorPages();
+
+using (var scope = app.Services.CreateScope())
+{
+  var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AdminUser>>();
+
+  await DbInitializer.SeedAdminUser(userManager);
+}
 
 app.Run();

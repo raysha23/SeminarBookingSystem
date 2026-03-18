@@ -7,6 +7,7 @@ namespace SeminarBookingSystem.Pages.UserManagement
     {
         public void OnGet()
         {
+            
         }
     }
 }
