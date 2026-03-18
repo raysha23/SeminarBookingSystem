@@ -10,7 +10,12 @@ var connectionString = builder.Configuration.GetConnectionString("SeminarBooking
 
 builder.Services.AddDbContext<SeminarBookingSystemContext>(options => options.UseSqlServer(connectionString));
 
-builder.Services.AddDefaultIdentity<AdminUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<SeminarBookingSystemContext>();
+builder.Services.AddIdentity<AdminUser, IdentityRole>(options =>
+{
+    options.SignIn.RequireConfirmedAccount = true;
+})
+.AddEntityFrameworkStores<SeminarBookingSystemContext>()
+.AddDefaultTokenProviders();
 
 // Add services to the container.
 builder.Services.AddRazorPages();
@@ -40,9 +45,10 @@ app.MapRazorPages();
 
 using (var scope = app.Services.CreateScope())
 {
-  var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AdminUser>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AdminUser>>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-  await DbInitializer.SeedAdminUser(userManager);
+    await DbInitializer.SeedData(userManager, roleManager);
 }
 
 app.Run();

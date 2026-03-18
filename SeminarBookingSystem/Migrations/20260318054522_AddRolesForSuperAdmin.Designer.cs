@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SeminarBookingSystem.Data;
 
@@ -11,9 +12,11 @@ using SeminarBookingSystem.Data;
 namespace SeminarBookingSystem.Migrations
 {
     [DbContext(typeof(SeminarBookingSystemContext))]
-    partial class SeminarBookingSystemContextModelSnapshot : ModelSnapshot
+    [Migration("20260318054522_AddRolesForSuperAdmin")]
+    partial class AddRolesForSuperAdmin
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
