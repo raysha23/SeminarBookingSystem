@@ -44,7 +44,7 @@
     <div class="table-card">
         <div class="table-header">
             <h3>Admin Users</h3>
-            <p>1 user</p>
+            <p>@Model.Users.Count user(s)</p>
         </div>
         <table class="user-table">
             <thead>
@@ -56,24 +56,6 @@
                     <th class="text-right">Actions</th>
                 </tr>
             </thead>
-            @* <tbody>
-                <tr>
-                    <td>
-                        <div class="user-name">
-                            <i class="bi bi-shield"></i>
-                            Super Admin
-                            <span class="badge-you">You</span>
-                        </div>
-                    </td>
-                    <td>admin@seminar.com</td>
-                    <td><span class="role-badge">super admin</span></td>
-                    <td>Mar 17, 2026</td>
-                    <td class="text-right actions">
-                        <button class="icon-btn edit"><i class="fa-regular fa-pen-to-square"></i></button>
-                        <button class="icon-btn delete"><i class="fa-regular fa-trash-can"></i></button>
-                    </td>
-                </tr>
-            </tbody> *@
             <tbody>
                 @foreach (var user in Model.Users)
                 {
@@ -85,14 +67,11 @@
                             </div>
                         </td>
                         <td>@user.Email</td>
-                        <td>
-                            <span class="role-badge">
-                                @Model.UserRoles[user.Id]
-                            </span>
-                        </td>
+                        <td><span class="role-badge">@Model.UserRoles[user.Id]</span></td>
                         <td>@user.CreatedAt.ToString("MMM dd, yyyy")</td>
                         <td class="text-right actions">
                             <button class="icon-btn edit"
+                                    data-id="@user.Id"
                                     data-name="@user.FullName"
                                     data-email="@user.Email"
                                     data-role="@Model.UserRoles[user.Id]">
@@ -112,20 +91,21 @@
         <div class="summary-card">
             <div class="card-info">
                 <p>Super Admins</p>
-                <span class="count">1</span>
+                <span class="count">@Model.Users.Count(u => Model.UserRoles[u.Id] == "Super Admin")</span>
             </div>
             <i class="bi bi-shield"></i>
         </div>
         <div class="summary-card">
             <div class="card-info">
                 <p>Staff Admins</p>
-                <span class="count blue">0</span>
+                <span class="count blue">@Model.Users.Count(u => Model.UserRoles[u.Id] == "Staff Admin")</span>
             </div>
             <i class="fa-solid fa-users-gear settings-icon"></i>
         </div>
     </div>
 </div>
-<!-- MODAL -->
+
+<!-- CREATE MODAL -->
 <div class="modal" id="adminModal">
     <div class="modal-content">
         <button class="close-btn">&times;</button>
@@ -134,7 +114,6 @@
         <form method="post" id="adminForm">
             <input type="hidden" asp-for="EditInput.Id" id="editId" />
             <div class="form-group">
-                <input type="hidden" asp-for="EditInput.Id" id="editId" />
                 <label asp-for="Input.FullName"></label>
                 <input asp-for="Input.FullName" class="form-control" placeholder="John Doe" />
                 <span asp-validation-for="Input.FullName" class="text-danger"></span>
@@ -149,7 +128,6 @@
             <div class="form-group">
                 <label asp-for="Input.Role"></label>
                 <select asp-for="Input.Role" class="form-control">
-                    <option value="">-- Select Role --</option>
                     <option value="Staff Admin">Staff Admin</option>
                     <option value="Super Admin">Super Admin</option>
                 </select>
@@ -163,6 +141,47 @@
             <div class="footer">
                 <button type="button" class="btn btn-cancel">Cancel</button>
                 <button type="submit" class="btn btn-create">Create User</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal" id="editAdminModal">
+    <div class="modal-content">
+        <button class="close-btn">&times;</button>
+        <h2 class="modal-title">Edit Admin User</h2>
+        <p class="subtitle">Update admin account information</p>
+        <form method="post" id="editAdminForm">
+            <input type="hidden" asp-for="EditInput.Id" id="editUserId" />
+            <div class="form-group">
+                <label asp-for="EditInput.FullName"></label>
+                <input asp-for="EditInput.FullName" class="form-control" placeholder="John Doe" id="EditInput_FullName" />
+                <span asp-validation-for="EditInput.FullName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="EditInput.Email"></label>
+                <input asp-for="EditInput.Email" class="form-control" placeholder="john@seminar.com" id="EditInput_Email" />
+                <span asp-validation-for="EditInput.Email" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="EditInput.Role"></label>
+                <select asp-for="EditInput.Role" class="form-control" id="EditInput_Role">
+                    <option value="Staff Admin">Staff Admin</option>
+                    <option value="Super Admin">Super Admin</option>
+                </select>
+                <span asp-validation-for="EditInput.Role" class="text-danger"></span>
+            </div>
+
+            <div class="note-box">
+                <strong>Note:</strong> Leave password unchanged. Default password is only for new users.
+            </div>
+
+            <div class="footer">
+                <button type="button" class="btn btn-cancel">Cancel</button>
+                <button type="submit" class="btn btn-create">Update User</button>
             </div>
         </form>
     </div>
@@ -187,112 +206,95 @@
 <script>
     document.addEventListener("DOMContentLoaded", function () {
 
-        const modal = document.getElementById("adminModal");
-        const form = document.getElementById("adminForm");
+        // CREATE MODAL
+        const createModal = document.getElementById("adminModal");
+        const createForm = document.getElementById("adminForm");
+        const openBtn = document.querySelector(".open-modal");
+        const createCloseBtn = createModal.querySelector(".close-btn");
+        const createCancelBtn = createModal.querySelector(".btn-cancel");
+        const createId = document.getElementById("editId");
+        const createFullName = document.getElementById("Input_FullName");
+        const createEmail = document.getElementById("Input_Email");
+        const createRole = document.getElementById("Input_Role");
 
-        const openBtn = document.querySelector(".open-modal"); // Create button
-        const editButtons = document.querySelectorAll(".icon-btn.edit");
-
-        const closeBtn = modal.querySelector(".close-btn");
-        const cancelBtn = modal.querySelector(".btn-cancel");
-
-        const inputFullName = document.getElementById("Input_FullName");
-        const inputEmail = document.getElementById("Input_Email");
-        const inputRole = document.getElementById("Input_Role");
-        const inputId = document.getElementById("editId");
-
-        const modalTitle = modal.querySelector(".modal-title");
-        const subtitle = modal.querySelector(".subtitle");
-
-        const submitButton = document.querySelector(".btn-create");
-        const notebox = document.querySelector(".note-box");
-
-      
-        // ✅ CREATE MODE
         openBtn?.addEventListener("click", () => {
-            modal.classList.add("show");
-
-            form.action = "?handler=CreateAdmin";
-
-            modalTitle.textContent = "Add Admin User";
-            subtitle.textContent = "Create a new admin account";
-
-            inputId.value = "";
-            inputFullName.value = "";
-            inputEmail.value = "";
-            inputRole.value = "Staff Admin";
+            createModal.classList.add("show");
+            createForm.action = "?handler=CreateAdmin";
+            createFullName.value = "";
+            createEmail.value = "";
+            createRole.value = "Staff Admin";
+            createId.value = "";
         });
 
-        // ✅ EDIT MODE
+        const closeCreateModal = () => {
+            createModal.classList.remove("show");
+            createForm.reset();
+        };
+        createCloseBtn.addEventListener("click", closeCreateModal);
+        createCancelBtn.addEventListener("click", closeCreateModal);
+        window.addEventListener("click", e => { if (e.target === createModal) closeCreateModal(); });
+
+        // EDIT MODAL
+        const editModal = document.getElementById("editAdminModal");
+        const editForm = document.getElementById("editAdminForm");
+        const editCloseBtn = editModal.querySelector(".close-btn");
+        const editCancelBtn = editModal.querySelector(".btn-cancel");
+
+        const editButtons = document.querySelectorAll(".icon-btn.edit");
         editButtons.forEach(btn => {
             btn.addEventListener("click", () => {
-                modal.classList.add("show");
+                editModal.classList.add("show");
+                editForm.action = "?handler=Edit";
 
-                form.action = "?handler=Edit";
-
-                modalTitle.textContent = "Edit Admin User";
-                subtitle.textContent = "Update user information";
-                submitButton.textContent = "Update User";
-                notebox.style.display = "none";
-                inputId.value = btn.dataset.id;
-                inputFullName.value = btn.dataset.name;
-                inputEmail.value = btn.dataset.email;
-                inputRole.value = btn.dataset.role;
+                document.getElementById("editUserId").value = btn.dataset.id;
+                document.getElementById("EditInput_FullName").value = btn.dataset.name;
+                document.getElementById("EditInput_Email").value = btn.dataset.email;
+                document.getElementById("EditInput_Role").value = btn.dataset.role;
             });
         });
 
-        // Close modal
-        const closeModal = () => {
-            modal.classList.remove("show");
-            form.reset();
+        const closeEditModal = () => {
+            editModal.classList.remove("show");
+            editForm.reset();
         };
+        editCloseBtn.addEventListener("click", closeEditModal);
+        editCancelBtn.addEventListener("click", closeEditModal);
+        window.addEventListener("click", e => { if (e.target === editModal) closeEditModal(); });
 
-        closeBtn.addEventListener("click", closeModal);
-        cancelBtn.addEventListener("click", closeModal);
+        // DELETE MODAL
+        const deleteModal = document.getElementById("deleteModal");
+        const deleteButtons = document.querySelectorAll(".icon-btn.delete");
+        const cancelDeleteBtn = deleteModal.querySelector(".btn-cancel-delete");
+        const confirmDeleteBtn = deleteModal.querySelector(".btn-delete-confirm");
+        const deleteForm = document.getElementById("deleteForm");
+        const deleteUserIdInput = document.getElementById("deleteUserId");
 
-        window.addEventListener("click", e => {
-            if (e.target === modal) closeModal();
+        let selectedUserId = null;
+
+        deleteButtons.forEach(btn => {
+            btn.addEventListener("click", () => {
+                selectedUserId = btn.dataset.id;
+                deleteModal.classList.add("show");
+            });
         });
 
-    });
-
-
-    const deleteModal = document.getElementById("deleteModal");
-    const deleteButtons = document.querySelectorAll(".icon-btn.delete");
-    const cancelDeleteBtn = deleteModal.querySelector(".btn-cancel-delete");
-    const confirmDeleteBtn = deleteModal.querySelector(".btn-delete-confirm");
-    const deleteForm = document.getElementById("deleteForm");
-    const deleteUserIdInput = document.getElementById("deleteUserId");
-
-    let selectedUserId = null;
-
-    // When clicking the trash icon
-    deleteButtons.forEach(btn => {
-        btn.addEventListener("click", () => {
-            selectedUserId = btn.dataset.id;
-            deleteModal.classList.add("show");
-        });
-    });
-
-    // Cancel button closes modal
-    cancelDeleteBtn.addEventListener("click", () => {
-        deleteModal.classList.remove("show");
-        selectedUserId = null;
-    });
-
-    // Confirm delete
-    confirmDeleteBtn.addEventListener("click", () => {
-        if (!selectedUserId) return;
-        deleteUserIdInput.value = selectedUserId;
-        deleteForm.action = "?handler=Delete"; // matches OnPostDeleteAsync
-        deleteForm.submit();
-    });
-
-    // Close modal by clicking outside
-    window.addEventListener("click", e => {
-        if (e.target === deleteModal) {
+        cancelDeleteBtn.addEventListener("click", () => {
             deleteModal.classList.remove("show");
             selectedUserId = null;
-        }
+        });
+
+        confirmDeleteBtn.addEventListener("click", () => {
+            if (!selectedUserId) return;
+            deleteUserIdInput.value = selectedUserId;
+            deleteForm.action = "?handler=Delete";
+            deleteForm.submit();
+        });
+
+        window.addEventListener("click", e => {
+            if (e.target === deleteModal) {
+                deleteModal.classList.remove("show");
+                selectedUserId = null;
+            }
+        });
     });
 </script>

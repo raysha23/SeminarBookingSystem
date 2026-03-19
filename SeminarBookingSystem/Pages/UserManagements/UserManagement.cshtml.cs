@@ -115,6 +115,13 @@ namespace SeminarBookingSystem.Pages.UserManagements
                     return RedirectToPage();
                 }
 
+                if (string.IsNullOrWhiteSpace(Input.Role))
+                {
+                    TempData["ErrorMessage"] = "Please select a role!";
+                    await LoadDataAsync();
+                    return Page();
+                }
+
                 // 2️⃣ Update user info
                 user.FullName = EditInput.FullName;
                 user.Email = EditInput.Email.Trim().ToLower();
