@@ -173,7 +173,7 @@
     padding: 5px;
     border-radius: 20px;
     font-size: 12px;
-    font-weight: bold;
+    font-weight: bolder;
 }
 
 .icon-btn {
@@ -184,6 +184,10 @@
     padding: 5px;
 }
 
+    .icon-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
     .icon-btn.delete {
         color: #f87171;
     }
@@ -223,14 +227,24 @@
 
 .user-name i {
     margin-left: 8px;
-    margin-right: 4px;
-    color: #7c3aed;
+    margin-right: 10px;
+    font-size: 15px;
 }
-
+.bi-shield {
+        color: #7c3aed;
+}
+.bi-person-gear {
+    color: #2563eb;
+}
 .user-name {
     font-weight: bold;
 }
-
+    .user-name strong {
+        margin-left: 10px;
+        padding: 2px 8px;
+        border-radius: 12px;
+        background-color: #f1f5f9;
+    }
 .edit,
 .delete {
     padding: 8px;
@@ -459,4 +473,13 @@
     background-color: #e60000; /* Vibrant red */
     color: #fff;
     border:none;
+}
+
+.role-super {
+    background-color: #f3e8ff;
+    color: #7c3aed;
+}
+.role-staff {
+    background-color: #e0f2fe;
+    color: #0284c7;
 }

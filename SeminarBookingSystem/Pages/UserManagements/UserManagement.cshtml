@@ -2,299 +2,368 @@
 @page "/UserManagement"
 @model UserManagementModel
 @{
-    Layout = "_MainLayout";
-    ViewData["Title"] = "User Management";
+	Layout = "_MainLayout";
+	ViewData["Title"] = "User Management";
 }
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 
 <link rel="stylesheet" href="~/css/user-management.css" asp-append-version="true" />
 
 <div class="management-container">
-    <header class="page-header">
-        <div class="header-text">
-            <h1>User Management</h1>
-            <p>Manage admin users and permissions</p>
-        </div>
-        <button class="btn-primary open-modal">+ Add Admin User</button>
-    </header>
+	<header class="page-header">
+		<div class="header-text">
+			<h1>User Management</h1>
+			<p>Manage admin users and permissions</p>
+		</div>
+		<button class="btn-primary open-modal">+ Add Admin User</button>
+	</header>
 
-    <div class="alert-box">
-        <i class="bi bi-shield"></i>
-        <div class="alert-content">
-            <strong>Super Admin Privileges</strong>
-            <p>
-                Only Super Admins can create, edit, and delete admin users. All new users will have the default password:
-                <code class="pwd-highlight">admin123</code>
-            </p>
-        </div>
-    </div>
+	<div class="alert-box">
+		<i class="bi bi-shield"></i>
+		<div class="alert-content">
+			<strong>Super Admin Privileges</strong>
+			<p>
+				Only Super Admins can create, edit, and delete admin users. All new users will have the default password:
+				<code class="pwd-highlight">admin123</code>
+			</p>
+		</div>
+	</div>
 
-    <div class="filter-bar">
-        <div class="search-wrapper">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" placeholder="Search users...">
-        </div>
-        <select class="role-select">
-            <option>All Roles</option>
-            <option>Super Admin</option>
-            <option>Staff Admin</option>
-        </select>
-    </div>
+	<div class="filter-bar">
+		<div class="search-wrapper">
+			<i class="fa-solid fa-magnifying-glass"></i>
+			<input type="text" id="searchInput" placeholder="Search users...">
+		</div>
+		<select id="roleFilter" class="role-select">
+			<option value="">All Roles</option>
+			<option value="Super Admin">Super Admin</option>
+			<option value="Staff Admin">Staff Admin</option>
+		</select>
+	</div>
 
-    <div class="table-card">
-        <div class="table-header">
-            <h3>Admin Users</h3>
-            <p>@Model.Users.Count user(s)</p>
-        </div>
-        <table class="user-table">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Created At</th>
-                    <th class="text-right">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var user in Model.Users)
-                {
-                    <tr>
-                        <td>
-                            <div class="user-name">
-                                <i class="bi @(Model.UserRoles[user.Id] == "Super Admin" ? "bi-shield" : "bi-person-gear")"></i>
-                                @user.FullName
-                            </div>
-                        </td>
-                        <td>@user.Email</td>
-                        <td><span class="role-badge">@Model.UserRoles[user.Id]</span></td>
-                        <td>@user.CreatedAt.ToString("MMM dd, yyyy")</td>
-                        <td class="text-right actions">
-                            <button class="icon-btn edit"
-                                    data-id="@user.Id"
-                                    data-name="@user.FullName"
-                                    data-email="@user.Email"
-                                    data-role="@Model.UserRoles[user.Id]">
-                                <i class="fa-regular fa-pen-to-square"></i>
-                            </button>
-                            <button class="icon-btn delete" data-id="@user.Id">
-                                <i class="fa-regular fa-trash-can"></i>
-                            </button>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
+	<div class="table-card">
+		<div class="table-header">
+			<h3>Admin Users</h3>
+			<p>@Model.Users.Count user(s)</p>
+		</div>
+		<table class="user-table">
+			<thead>
+				<tr>
+					<th>Name</th>
+					<th>Email</th>
+					<th>Role</th>
+					<th>Created At</th>
+					<th class="text-right">Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				@foreach (var user in Model.Users)
+				{
+					<tr>
+						<td>
+							<div class="user-name">
+								<i class="bi @(Model.UserRoles[user.Id] == "Super Admin" ? "bi-shield" : "bi-person-gear")"></i>
+								@user.FullName
+								@if (user.Id == Model.CurrentLoginedInUserId)
+								{
+									<strong>You</strong>
+								}
+							</div>
+						</td>
+						<td>@user.Email</td>
+						<td>
+							<span class="role-badge @(Model.UserRoles[user.Id] == "Super Admin" ? "role-super" : "role-staff")">
+								@Model.UserRoles[user.Id]
+							</span>
+						</td>
+						<td>@user.CreatedAt.ToString("MMM dd, yyyy")</td>
+						<td class="text-right actions">
+							<button class="icon-btn edit"
+									data-id="@user.Id"
+									data-name="@user.FullName"
+									data-email="@user.Email"
+									data-role="@Model.UserRoles[user.Id]">
+								<i class="fa-regular fa-pen-to-square"></i>
+							</button>
 
-    <div class="summary-grid">
-        <div class="summary-card">
-            <div class="card-info">
-                <p>Super Admins</p>
-                <span class="count">@Model.Users.Count(u => Model.UserRoles[u.Id] == "Super Admin")</span>
-            </div>
-            <i class="bi bi-shield"></i>
-        </div>
-        <div class="summary-card">
-            <div class="card-info">
-                <p>Staff Admins</p>
-                <span class="count blue">@Model.Users.Count(u => Model.UserRoles[u.Id] == "Staff Admin")</span>
-            </div>
-            <i class="fa-solid fa-users-gear settings-icon"></i>
-        </div>
-    </div>
+							<button class="icon-btn delete"
+									data-id="@user.Id"
+									@(user.Id == Model.CurrentLoginedInUserId ? "disabled" : "")>
+								<i class="fa-regular fa-trash-can"></i>
+							</button>
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+
+	<div class="summary-grid">
+		<div class="summary-card">
+			<div class="card-info">
+				<p>Super Admins</p>
+				<span class="count">@Model.Users.Count(u => Model.UserRoles[u.Id] == "Super Admin")</span>
+			</div>
+			<i class="bi bi-shield"></i>
+		</div>
+		<div class="summary-card">
+			<div class="card-info">
+				<p>Staff Admins</p>
+				<span class="count blue">@Model.Users.Count(u => Model.UserRoles[u.Id] == "Staff Admin")</span>
+			</div>
+			<i class="fa-solid fa-users-gear settings-icon"></i>
+		</div>
+	</div>
 </div>
 
 <!-- CREATE MODAL -->
 <div class="modal" id="adminModal">
-    <div class="modal-content">
-        <button class="close-btn">&times;</button>
-        <h2 class="modal-title">Add Admin User</h2>
-        <p class="subtitle">Create a new admin account</p>
-        <form method="post" id="adminForm">
-            <input type="hidden" asp-for="EditInput.Id" id="editId" />
-            <div class="form-group">
-                <label asp-for="Input.FullName"></label>
-                <input asp-for="Input.FullName" class="form-control" placeholder="John Doe" />
-                <span asp-validation-for="Input.FullName" class="text-danger"></span>
-            </div>
+	<div class="modal-content">
+		<button class="close-btn">&times;</button>
+		<h2 class="modal-title">Add Admin User</h2>
+		<p class="subtitle">Create a new admin account</p>
+		<form method="post" id="adminForm">
+			<input type="hidden" asp-for="EditInput.Id" id="editId" />
+			<div class="form-group">
+				<label asp-for="Input.FullName"></label>
+				<input asp-for="Input.FullName" class="form-control" placeholder="John Doe" />
+				<span asp-validation-for="Input.FullName" class="text-danger"></span>
+			</div>
 
-            <div class="form-group">
-                <label asp-for="Input.Email"></label>
-                <input asp-for="Input.Email" class="form-control" placeholder="john@seminar.com" />
-                <span asp-validation-for="Input.Email" class="text-danger"></span>
-            </div>
+			<div class="form-group">
+				<label asp-for="Input.Email"></label>
+				<input asp-for="Input.Email" class="form-control" placeholder="john@seminar.com" />
+				<span asp-validation-for="Input.Email" class="text-danger"></span>
+			</div>
 
-            <div class="form-group">
-                <label asp-for="Input.Role"></label>
-                <select asp-for="Input.Role" class="form-control">
-                    <option value="Staff Admin">Staff Admin</option>
-                    <option value="Super Admin">Super Admin</option>
-                </select>
-                <span asp-validation-for="Input.Role" class="text-danger"></span>
-            </div>
+			<div class="form-group">
+				<label asp-for="Input.Role"></label>
+				<select asp-for="Input.Role" class="form-control">
+					<option value="Staff Admin">Staff Admin</option>
+					<option value="Super Admin">Super Admin</option>
+				</select>
+				<span asp-validation-for="Input.Role" class="text-danger"></span>
+			</div>
 
-            <div class="note-box">
-                <strong>Note:</strong> Default password: <strong>Admin123!</strong>
-            </div>
+			<div class="note-box">
+				<strong>Note:</strong> Default password: <strong>Admin123!</strong>
+			</div>
 
-            <div class="footer">
-                <button type="button" class="btn btn-cancel">Cancel</button>
-                <button type="submit" class="btn btn-create">Create User</button>
-            </div>
-        </form>
-    </div>
+			<div class="footer">
+				<button type="button" class="btn btn-cancel">Cancel</button>
+				<button type="submit" class="btn btn-create">Create User</button>
+			</div>
+		</form>
+	</div>
 </div>
 
 <!-- EDIT MODAL -->
 <div class="modal" id="editAdminModal">
-    <div class="modal-content">
-        <button class="close-btn">&times;</button>
-        <h2 class="modal-title">Edit Admin User</h2>
-        <p class="subtitle">Update admin account information</p>
-        <form method="post" id="editAdminForm">
-            <input type="hidden" asp-for="EditInput.Id" id="editUserId" />
-            <div class="form-group">
-                <label asp-for="EditInput.FullName"></label>
-                <input asp-for="EditInput.FullName" class="form-control" placeholder="John Doe" id="EditInput_FullName" />
-                <span asp-validation-for="EditInput.FullName" class="text-danger"></span>
-            </div>
+	<div class="modal-content">
+		<button class="close-btn">&times;</button>
+		<h2 class="modal-title">Edit Admin User</h2>
+		<p class="subtitle">Update admin account information</p>
+		<form method="post" id="editAdminForm">
+			<!-- Hidden ID -->
+			<input type="hidden" asp-for="EditInput.Id" id="EditInput_Id" />
 
-            <div class="form-group">
-                <label asp-for="EditInput.Email"></label>
-                <input asp-for="EditInput.Email" class="form-control" placeholder="john@seminar.com" id="EditInput_Email" />
-                <span asp-validation-for="EditInput.Email" class="text-danger"></span>
-            </div>
+			<div class="form-group">
+				<label asp-for="EditInput.FullName"></label>
+				<input asp-for="EditInput.FullName" class="form-control" id="EditInput_FullName" />
+				<span asp-validation-for="EditInput.FullName" class="text-danger"></span>
+			</div>
 
-            <div class="form-group">
-                <label asp-for="EditInput.Role"></label>
-                <select asp-for="EditInput.Role" class="form-control" id="EditInput_Role">
-                    <option value="Staff Admin">Staff Admin</option>
-                    <option value="Super Admin">Super Admin</option>
-                </select>
-                <span asp-validation-for="EditInput.Role" class="text-danger"></span>
-            </div>
+			<div class="form-group">
+				<label asp-for="EditInput.Email"></label>
+				<input asp-for="EditInput.Email" class="form-control" id="EditInput_Email" />
+				<span asp-validation-for="EditInput.Email" class="text-danger"></span>
+			</div>
 
-            <div class="note-box">
-                <strong>Note:</strong> Leave password unchanged. Default password is only for new users.
-            </div>
+			<div class="form-group">
+				<label asp-for="EditInput.Role"></label>
+				<select asp-for="EditInput.Role" class="form-control" id="EditInput_Role">
+					<option value="Staff Admin">Staff Admin</option>
+					<option value="Super Admin">Super Admin</option>
+				</select>
+				<span asp-validation-for="EditInput.Role" class="text-danger"></span>
+			</div>
 
-            <div class="footer">
-                <button type="button" class="btn btn-cancel">Cancel</button>
-                <button type="submit" class="btn btn-create">Update User</button>
-            </div>
-        </form>
-    </div>
+			<div class="note-box">
+				<strong>Note:</strong> Leave password unchanged. Default password is only for new users.
+			</div>
+
+			<div class="footer">
+				<button type="button" class="btn btn-cancel">Cancel</button>
+				<button type="submit" class="btn btn-create">Update User</button>
+			</div>
+		</form>
+	</div>
 </div>
 
 <!-- DELETE CONFIRM MODAL -->
 <div class="modal" id="deleteModal">
-    <div class="modal-content delete-modal-content">
-        <h2>Delete User</h2>
-        <p>Are you sure you want to delete this admin user? This action will soft delete the user account and prevent them from logging in.</p>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-cancel-delete">Cancel</button>
-            <button type="button" class="btn btn-delete-confirm">Delete</button>
-        </div>
-    </div>
+	<div class="modal-content delete-modal-content">
+		<h2>Delete User</h2>
+		<p>Are you sure you want to delete this admin user? This action will soft delete the user account and prevent them from logging in.</p>
+		<div class="modal-footer">
+			<button type="button" class="btn btn-cancel-delete">Cancel</button>
+			<button type="button" class="btn btn-delete-confirm">Delete</button>
+		</div>
+	</div>
 </div>
 
 <form id="deleteForm" method="post" style="display:none;">
-    <input type="hidden" name="id" id="deleteUserId" />
+	<input type="hidden" name="id" id="deleteUserId" />
 </form>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+	document.addEventListener("DOMContentLoaded", function () {
 
-        // CREATE MODAL
-        const createModal = document.getElementById("adminModal");
-        const createForm = document.getElementById("adminForm");
-        const openBtn = document.querySelector(".open-modal");
-        const createCloseBtn = createModal.querySelector(".close-btn");
-        const createCancelBtn = createModal.querySelector(".btn-cancel");
-        const createId = document.getElementById("editId");
-        const createFullName = document.getElementById("Input_FullName");
-        const createEmail = document.getElementById("Input_Email");
-        const createRole = document.getElementById("Input_Role");
+		// CREATE MODAL
+		const createModal = document.getElementById("adminModal");
+		const createForm = document.getElementById("adminForm");
+		const openBtn = document.querySelector(".open-modal");
+		const createCloseBtn = createModal.querySelector(".close-btn");
+		const createCancelBtn = createModal.querySelector(".btn-cancel");
+		const createId = document.getElementById("editId");
+		const createFullName = document.getElementById("Input_FullName");
+		const createEmail = document.getElementById("Input_Email");
+		const createRole = document.getElementById("Input_Role");
 
-        openBtn?.addEventListener("click", () => {
-            createModal.classList.add("show");
-            createForm.action = "?handler=CreateAdmin";
-            createFullName.value = "";
-            createEmail.value = "";
-            createRole.value = "Staff Admin";
-            createId.value = "";
-        });
+		openBtn?.addEventListener("click", () => {
+			createModal.classList.add("show");
+			createForm.action = "?handler=CreateAdmin";
+			createFullName.value = "";
+			createEmail.value = "";
+			createRole.value = "Staff Admin";
+			createId.value = "";
+		});
 
-        const closeCreateModal = () => {
-            createModal.classList.remove("show");
-            createForm.reset();
-        };
-        createCloseBtn.addEventListener("click", closeCreateModal);
-        createCancelBtn.addEventListener("click", closeCreateModal);
-        window.addEventListener("click", e => { if (e.target === createModal) closeCreateModal(); });
+		const closeCreateModal = () => {
+			createModal.classList.remove("show");
+			createForm.reset();
+		};
+		createCloseBtn.addEventListener("click", closeCreateModal);
+		createCancelBtn.addEventListener("click", closeCreateModal);
+		window.addEventListener("click", e => { if (e.target === createModal) closeCreateModal(); });
 
-        // EDIT MODAL
-        const editModal = document.getElementById("editAdminModal");
-        const editForm = document.getElementById("editAdminForm");
-        const editCloseBtn = editModal.querySelector(".close-btn");
-        const editCancelBtn = editModal.querySelector(".btn-cancel");
+			// EDIT MODAL
+			const editModal = document.getElementById("editAdminModal");
+			const editForm = document.getElementById("editAdminForm");
+			const editCloseBtn = editModal.querySelector(".close-btn");
+			const editCancelBtn = editModal.querySelector(".btn-cancel");
 
-        const editButtons = document.querySelectorAll(".icon-btn.edit");
-        editButtons.forEach(btn => {
-            btn.addEventListener("click", () => {
-                editModal.classList.add("show");
-                editForm.action = "?handler=Edit";
+			const editButtons = document.querySelectorAll(".icon-btn.edit");
 
-                document.getElementById("editUserId").value = btn.dataset.id;
-                document.getElementById("EditInput_FullName").value = btn.dataset.name;
-                document.getElementById("EditInput_Email").value = btn.dataset.email;
-                document.getElementById("EditInput_Role").value = btn.dataset.role;
-            });
-        });
+			editButtons.forEach(btn => {
+				btn.addEventListener("click", () => {
+					editModal.classList.add("show");
+					editForm.action = "?handler=Edit";
 
-        const closeEditModal = () => {
-            editModal.classList.remove("show");
-            editForm.reset();
-        };
-        editCloseBtn.addEventListener("click", closeEditModal);
-        editCancelBtn.addEventListener("click", closeEditModal);
-        window.addEventListener("click", e => { if (e.target === editModal) closeEditModal(); });
+					// Populate the form fields
+					document.getElementById("EditInput_Id").value = btn.dataset.id;
+					document.getElementById("EditInput_FullName").value = btn.dataset.name;
+					document.getElementById("EditInput_Email").value = btn.dataset.email;
+					document.getElementById("EditInput_Role").value = btn.dataset.role;
 
-        // DELETE MODAL
-        const deleteModal = document.getElementById("deleteModal");
-        const deleteButtons = document.querySelectorAll(".icon-btn.delete");
-        const cancelDeleteBtn = deleteModal.querySelector(".btn-cancel-delete");
-        const confirmDeleteBtn = deleteModal.querySelector(".btn-delete-confirm");
-        const deleteForm = document.getElementById("deleteForm");
-        const deleteUserIdInput = document.getElementById("deleteUserId");
+					// Debug: log to console
+					console.log("Editing User:");
+					console.log("ID:", btn.dataset.id);
+					console.log("FullName:", btn.dataset.name);
+					console.log("Email:", btn.dataset.email);
+					console.log("Role:", btn.dataset.role);
+				});
+			});
 
-        let selectedUserId = null;
+			const closeEditModal = () => {
+				editModal.classList.remove("show");
+				editForm.reset();
+			};
+			editCloseBtn.addEventListener("click", closeEditModal);
+			editCancelBtn.addEventListener("click", closeEditModal);
+			window.addEventListener("click", e => { if (e.target === editModal) closeEditModal(); });
 
-        deleteButtons.forEach(btn => {
-            btn.addEventListener("click", () => {
-                selectedUserId = btn.dataset.id;
-                deleteModal.classList.add("show");
-            });
-        });
+		// DELETE MODAL
+		const deleteModal = document.getElementById("deleteModal");
+		const deleteButtons = document.querySelectorAll(".icon-btn.delete");
+		const cancelDeleteBtn = deleteModal.querySelector(".btn-cancel-delete");
+		const confirmDeleteBtn = deleteModal.querySelector(".btn-delete-confirm");
+		const deleteForm = document.getElementById("deleteForm");
+		const deleteUserIdInput = document.getElementById("deleteUserId");
 
-        cancelDeleteBtn.addEventListener("click", () => {
-            deleteModal.classList.remove("show");
-            selectedUserId = null;
-        });
+		let selectedUserId = null;
 
-        confirmDeleteBtn.addEventListener("click", () => {
-            if (!selectedUserId) return;
-            deleteUserIdInput.value = selectedUserId;
-            deleteForm.action = "?handler=Delete";
-            deleteForm.submit();
-        });
+		deleteButtons.forEach(btn => {
+			btn.addEventListener("click", () => {
+				selectedUserId = btn.dataset.id;
+				deleteModal.classList.add("show");
+			});
+		});
 
-        window.addEventListener("click", e => {
-            if (e.target === deleteModal) {
-                deleteModal.classList.remove("show");
-                selectedUserId = null;
-            }
-        });
-    });
+		cancelDeleteBtn.addEventListener("click", () => {
+			deleteModal.classList.remove("show");
+			selectedUserId = null;
+		});
+
+		confirmDeleteBtn.addEventListener("click", () => {
+			if (!selectedUserId) return;
+			deleteUserIdInput.value = selectedUserId;
+			deleteForm.action = "?handler=Delete";
+			deleteForm.submit();
+		});
+
+		window.addEventListener("click", e => {
+			if (e.target === deleteModal) {
+				deleteModal.classList.remove("show");
+				selectedUserId = null;
+			}
+		});
+
+		//Role Filter
+		const searchInput = document.getElementById("searchInput");
+		const roleFilter = document.getElementById("roleFilter");
+		const tableRows = document.querySelectorAll(".user-table tbody tr");
+
+		function filterTable() {
+		const searchTerm = searchInput.value.toLowerCase();
+		const selectedRole = roleFilter.value;
+
+		tableRows.forEach(row => {
+			const name = row.querySelector(".user-name").textContent.toLowerCase();
+
+			// Trim and normalize role text
+			const roleElement = row.querySelector(".role-badge");
+			const role = roleElement ? roleElement.textContent.trim() : "";
+
+			const matchesSearch = name.includes(searchTerm);
+			const matchesRole = selectedRole === "" || role === selectedRole;
+
+			row.style.display = (matchesSearch && matchesRole) ? "" : "none";
+		});
+	}
+
+	searchInput.addEventListener("input", filterTable);
+	roleFilter.addEventListener("change", filterTable);
+
+
+
+
+	//Full Name input
+	const fullNameInput = document.getElementById("Input_FullName");
+	const editFullNameInput = document.getElementById("EditInput_FullName");
+	if (fullNameInput) {
+		fullNameInput.addEventListener("input", function() {
+			// Remove any number or symbol as user types
+			this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
+		});
+	}
+	if (editFullNameInput) {
+		editFullNameInput.addEventListener("input", function() {
+			// Remove any number or symbol as user types
+			this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
+		});
+	}
+	
+
+	});
 </script>
