@@ -1,4 +1,9 @@
 ﻿@* File Path: SeminarBookingSystem/Pages/Shared/_MainLayout.cshtml *@
+@using Microsoft.AspNetCore.Identity
+@using SeminarBookingSystem.Models
+@inject SignInManager<AdminUser> SignInManager
+@inject UserManager<AdminUser> UserManager
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,9 +12,7 @@
     <title>@ViewData["Title"] - Seminar Booking System</title>
     <link rel="stylesheet" href="~/css/main.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <!-- Font Awesome (icons only) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-
 </head>
 
 <body>
@@ -22,15 +25,24 @@
 
         <div class="admin-profile">
             <div class="admin-info">
-                <strong>Super Admin</strong>
-                <span>Administrator</span>
+                @* Display current logged-in user's name *@
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    var currentUser = await UserManager.GetUserAsync(User);
+                    <strong>@currentUser.FullName</strong>
+                    <span>Administrator</span>
+                }
             </div>
 
-            <a href="/Logout" class="logout-btn">
-                <i class="fa-solid fa-right-from-bracket"></i> Logout
-            </a>
+            <form method="post" asp-area="Identity" asp-page="/Account/Logout" style="display:inline;">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="logout-btn">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </button>
+            </form>
         </div>
     </div>
+
     <!-- MAIN CONTENT -->
     <div class="main-content">
         <!-- SIDEBAR -->
@@ -55,22 +67,31 @@
                 </li>
 
                 <li class="nav-item">
-                    <a href="/Bookings" class="nav-link">
+                    <a href="/BookingHistory" class="nav-link">
                         <i class="fa-solid fa-clock-rotate-left"></i> Booking History
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a href="/Logs" class="nav-link">
+                    <a href="/ActivityLogs" class="nav-link">
                         <i class="fa-solid fa-wave-square"></i> Activity Logs
                     </a>
                 </li>
 
-                <li class="nav-item">
-                    <a href="/UserManagement" class="nav-link">
-                        <i class="fa-solid fa-user-gear"></i> User Management
-                    </a>
-                </li>
+                @* Only show User Management link if the user is Super Admin *@
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    var currentUser = await UserManager.GetUserAsync(User);
+                    var roles = await UserManager.GetRolesAsync(currentUser);
+                    if (roles.Contains("Super Admin"))
+                    {
+                        <li class="nav-item">
+                            <a href="/UserManagement" class="nav-link">
+                                <i class="fa-solid fa-user-gear"></i> User Management
+                            </a>
+                        </li>
+                    }
+                }
             </ul>
         </div>
 
@@ -80,6 +101,36 @@
         </div>
     </div>
 
-</body>
+    @* Toast messages *@
+    @{
+        var successMessage = TempData["SuccessMessage"] as string;
+        var errorMessage = TempData["ErrorMessage"] as string;
+    }
 
+    @if (!string.IsNullOrEmpty(successMessage))
+    {
+        <div id="successToast" class="toast toast-success">
+            <i class="bi bi-check-circle-fill"></i> @successMessage
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div id="errorToast" class="toast toast-error">
+            <i class="bi bi-exclamation-circle-fill"></i> @errorMessage
+        </div>
+    }
+
+    <script>
+        window.onload = function () {
+            document.querySelectorAll('.toast').forEach(toast => {
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateY(-20px)';
+                    setTimeout(() => toast.remove(), 500);
+                }, 3000);
+            });
+        };
+    </script>
+</body>
 </html>

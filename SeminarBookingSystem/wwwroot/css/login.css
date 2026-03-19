@@ -160,7 +160,7 @@ body {
 }
 
 
-.toast-error {
+.toast-error, .toast-success {
     position: fixed;
     top: 20px;
     width: 350px;
@@ -190,3 +190,4 @@ body {
         transform: translateY(0);
     }
 }
+

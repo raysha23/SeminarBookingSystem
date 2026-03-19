@@ -1,91 +1,91 @@
 ﻿@page "/Login"
 @model LoginModel
 @{
-    Layout = "_LoginLayout";
+	Layout = "_LoginLayout";
 }
 
 <div>
-    @* Error toast only shows if ShowLoginError is true *@
-    @if (Model.ShowLoginError)
-    {
-        <div id="errorToast" class="toast-error">
-            <i class="bi bi-exclamation-circle-fill"></i>
-            Invalid email or password
-        </div>
-    }
-    
-    <div class="brand-icon"><i class="bi bi-calendar-heart-fill"></i></div>
-    <div class="title">Seminar Booking System</div>
-    <div class="subtitle">Admin Portal</div>
+	@* ERROR TOAST *@
+	@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+	{
+		<div id="errorToast" class="toast toast-error">
+			<i class="bi bi-exclamation-circle-fill"></i>
+			@Model.ErrorMessage
+		</div>
+	}
 
-    <div class="login-card">
-        <div class="card-title">Sign In</div>
-        <div class="card-subtitle">Enter your credentials</div>
+	<div class="brand-icon"><i class="bi bi-calendar-heart-fill"></i></div>
+	<div class="title">Seminar Booking System</div>
+	<div class="subtitle">Admin Portal</div>
 
-        <form method="post">
-            <div class="form-group">
-                <label asp-for="Input.Email"></label>
-                <input asp-for="Input.Email" id="Input_Email" class="form-input" placeholder="admin@seminar.com"
-                       required />
-            </div>
+	<div class="login-card">
+		<div class="card-title">Sign In</div>
+		<div class="card-subtitle">Enter your credentials</div>
 
-            <div class="form-group">
-                <label asp-for="Input.Password"></label>
-                <input asp-for="Input.Password" id="Input_Password" class="form-input" placeholder="Enter your password"
-                       required />
-            </div>
+		<form method="post">
+			<div class="form-group">
+				<label asp-for="Input.Email"></label>
+				<input asp-for="Input.Email" id="Input_Email" class="form-input" placeholder="admin@seminar.com"
+					   required />
+			</div>
 
-            <div class="form-group form-options">
-                <div class="remember-me">
-                    <input asp-for="Input.RememberMe" type="checkbox" id="rememberMe" />
-                    <label asp-for="Input.RememberMe">Remember me?</label>
-                </div>
-                <div class="forgot-password">
-                    <a asp-page="./ForgotPassword">Forgot Password?</a>
-                </div>
-            </div>
+			<div class="form-group">
+				<label asp-for="Input.Password"></label>
+				<input asp-for="Input.Password" id="Input_Password" class="form-input" placeholder="Enter your password"
+					   required />
+			</div>
 
-            <button type="submit" class="btn-login">
-                <i class="bi bi-box-arrow-in-right"></i> Sign In
-            </button>
-        </form>
+			<div class="form-group form-options">
+				<div class="remember-me">
+					<input asp-for="Input.RememberMe" type="checkbox" id="rememberMe" />
+					<label asp-for="Input.RememberMe">Remember me?</label>
+				</div>
+				<div class="forgot-password">
+					<a asp-page="./ForgotPassword">Forgot Password?</a>
+				</div>
+			</div>
 
-        <div class="demo-box">
-            <div class="demo-title">Demo Credentials:</div>
-            <p class="demo-text">Email: admin@seminar.com</p>
-            <p class="demo-text">Password: Admin123!</p>
-        </div>
-    </div>
+			<button type="submit" class="btn-login">
+				<i class="bi bi-box-arrow-in-right"></i> Sign In
+			</button>
+		</form>
 
-    <div class="footer-text">
-        Contact your Super Admin if you need access
-    </div>
+		<div class="demo-box">
+			<div class="demo-title">Demo Credentials:</div>
+			<p class="demo-text">Email: admin@seminar.com</p>
+			<p class="demo-text">Password: Admin123!</p>
+		</div>
+	</div>
+
+	<div class="footer-text">
+		Contact your Super Admin if you need access
+	</div>
 </div>
 
 <script>
-    window.onload = function () {
-        // Toast logic for error or success
-        const errorToast = document.getElementById("errorToast");
-        const successToast = document.getElementById("successToast");
+	window.onload = function () {
+		// Toast logic for error or success
+		const errorToast = document.getElementById("errorToast");
+		const successToast = document.getElementById("successToast");
 
-        [errorToast, successToast].forEach(toast => {
-            if (toast) {
-                setTimeout(() => {
-                    toast.style.opacity = "0";
-                    toast.style.transform = "translateY(-20px)";
-                    setTimeout(() => toast.remove(), 500);
-                }, 3000);
-            }
-        });
+		[errorToast, successToast].forEach(toast => {
+			if (toast) {
+				setTimeout(() => {
+					toast.style.opacity = "0";
+					toast.style.transform = "translateY(-20px)";
+					setTimeout(() => toast.remove(), 500);
+				}, 3000);
+			}
+		});
 
-        // For testing: log typed email and password when form is submitted
-        const form = document.querySelector("form");
-        const emailInput = document.getElementById("Input_Email");
-        const passwordInput = document.getElementById("Input_Password");
+		// For testing: log typed email and password when form is submitted
+		const form = document.querySelector("form");
+		const emailInput = document.getElementById("Input_Email");
+		const passwordInput = document.getElementById("Input_Password");
 
-        form.addEventListener("submit", function () {
-            console.log("Email input:", emailInput.value);
-            console.log("Password input:", passwordInput.value);
-        });
-    };
+		form.addEventListener("submit", function () {
+			console.log("Email input:", emailInput.value);
+			console.log("Password input:", passwordInput.value);
+		});
+	};
 </script>

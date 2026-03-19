@@ -1,3 +1,7 @@
 ﻿@using SeminarBookingSystem
 @namespace SeminarBookingSystem.Pages
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Authorization
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@* By default, all pages require authorization *@
+@attribute [Authorize]
