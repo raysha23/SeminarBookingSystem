@@ -92,10 +92,13 @@
                         </td>
                         <td>@user.CreatedAt.ToString("MMM dd, yyyy")</td>
                         <td class="text-right actions">
-                            <button class="icon-btn edit">
+                            <button class="icon-btn edit"
+                                    data-name="@user.FullName"
+                                    data-email="@user.Email"
+                                    data-role="@Model.UserRoles[user.Id]">
                                 <i class="fa-regular fa-pen-to-square"></i>
                             </button>
-                            <button class="icon-btn delete">
+                            <button class="icon-btn delete" data-id="@user.Id">
                                 <i class="fa-regular fa-trash-can"></i>
                             </button>
                         </td>
@@ -128,8 +131,10 @@
         <button class="close-btn">&times;</button>
         <h2 class="modal-title">Add Admin User</h2>
         <p class="subtitle">Create a new admin account</p>
-        <form method="post" id="adminForm" asp-page-handler="CreateAdmin">
+        <form method="post" id="adminForm">
+            <input type="hidden" asp-for="EditInput.Id" id="editId" />
             <div class="form-group">
+                <input type="hidden" asp-for="EditInput.Id" id="editId" />
                 <label asp-for="Input.FullName"></label>
                 <input asp-for="Input.FullName" class="form-control" placeholder="John Doe" />
                 <span asp-validation-for="Input.FullName" class="text-danger"></span>
@@ -175,24 +180,65 @@
     </div>
 </div>
 
+<form id="deleteForm" method="post" style="display:none;">
+    <input type="hidden" name="id" id="deleteUserId" />
+</form>
+
 <script>
-          document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function () {
+
         const modal = document.getElementById("adminModal");
-        const openBtn = document.querySelector(".open-modal");
+        const form = document.getElementById("adminForm");
+
+        const openBtn = document.querySelector(".open-modal"); // Create button
+        const editButtons = document.querySelectorAll(".icon-btn.edit");
+
         const closeBtn = modal.querySelector(".close-btn");
         const cancelBtn = modal.querySelector(".btn-cancel");
-        const form = document.getElementById("adminForm");
 
         const inputFullName = document.getElementById("Input_FullName");
         const inputEmail = document.getElementById("Input_Email");
         const inputRole = document.getElementById("Input_Role");
+        const inputId = document.getElementById("editId");
 
-        // Open modal
+        const modalTitle = modal.querySelector(".modal-title");
+        const subtitle = modal.querySelector(".subtitle");
+
+        const submitButton = document.querySelector(".btn-create");
+        const notebox = document.querySelector(".note-box");
+
+      
+        // ✅ CREATE MODE
         openBtn?.addEventListener("click", () => {
             modal.classList.add("show");
+
+            form.action = "?handler=CreateAdmin";
+
+            modalTitle.textContent = "Add Admin User";
+            subtitle.textContent = "Create a new admin account";
+
+            inputId.value = "";
             inputFullName.value = "";
             inputEmail.value = "";
             inputRole.value = "Staff Admin";
+        });
+
+        // ✅ EDIT MODE
+        editButtons.forEach(btn => {
+            btn.addEventListener("click", () => {
+                modal.classList.add("show");
+
+                form.action = "?handler=Edit";
+
+                modalTitle.textContent = "Edit Admin User";
+                subtitle.textContent = "Update user information";
+                submitButton.textContent = "Update User";
+                notebox.style.display = "none";
+                inputId.value = btn.dataset.id;
+                inputFullName.value = btn.dataset.name;
+                inputEmail.value = btn.dataset.email;
+                inputRole.value = btn.dataset.role;
+            });
         });
 
         // Close modal
@@ -200,18 +246,53 @@
             modal.classList.remove("show");
             form.reset();
         };
+
         closeBtn.addEventListener("click", closeModal);
         cancelBtn.addEventListener("click", closeModal);
-        window.addEventListener("click", e => { if (e.target === modal) closeModal(); });
 
-        // Debug form submit
-        form.addEventListener("submit", (e) => {
-            console.log("Submitting Create Admin form:", {
-                fullName: inputFullName.value,
-                email: inputEmail.value,
-                role: inputRole.value
-            });
-            // let the form submit normally to trigger OnPostCreateAdminAsync
+        window.addEventListener("click", e => {
+            if (e.target === modal) closeModal();
         });
+
+    });
+
+
+    const deleteModal = document.getElementById("deleteModal");
+    const deleteButtons = document.querySelectorAll(".icon-btn.delete");
+    const cancelDeleteBtn = deleteModal.querySelector(".btn-cancel-delete");
+    const confirmDeleteBtn = deleteModal.querySelector(".btn-delete-confirm");
+    const deleteForm = document.getElementById("deleteForm");
+    const deleteUserIdInput = document.getElementById("deleteUserId");
+
+    let selectedUserId = null;
+
+    // When clicking the trash icon
+    deleteButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            selectedUserId = btn.dataset.id;
+            deleteModal.classList.add("show");
+        });
+    });
+
+    // Cancel button closes modal
+    cancelDeleteBtn.addEventListener("click", () => {
+        deleteModal.classList.remove("show");
+        selectedUserId = null;
+    });
+
+    // Confirm delete
+    confirmDeleteBtn.addEventListener("click", () => {
+        if (!selectedUserId) return;
+        deleteUserIdInput.value = selectedUserId;
+        deleteForm.action = "?handler=Delete"; // matches OnPostDeleteAsync
+        deleteForm.submit();
+    });
+
+    // Close modal by clicking outside
+    window.addEventListener("click", e => {
+        if (e.target === deleteModal) {
+            deleteModal.classList.remove("show");
+            selectedUserId = null;
+        }
     });
 </script>

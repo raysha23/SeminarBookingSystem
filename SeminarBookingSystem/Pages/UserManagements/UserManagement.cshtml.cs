@@ -101,6 +101,53 @@ namespace SeminarBookingSystem.Pages.UserManagements
         }
 
 
+
+        //Edit Post
+        public async Task<IActionResult> OnPostEditAsync()
+        {
+            try
+            {
+                // 1️⃣ Find the user by ID
+                var user = await _userManager.FindByIdAsync(EditInput.Id);
+                if (user == null)
+                {
+                    TempData["ErrorMessage"] = "User not found!";
+                    return RedirectToPage();
+                }
+
+                // 2️⃣ Update user info
+                user.FullName = EditInput.FullName;
+                user.Email = EditInput.Email.Trim().ToLower();
+
+                var result = await _userManager.UpdateAsync(user);
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    TempData["ErrorMessage"] = "Update failed: " + errors;
+                    await LoadDataAsync();
+                    return Page();
+                }
+
+                // 3️⃣ Update role (optional, only if changed)
+                var currentRoles = await _userManager.GetRolesAsync(user);
+                if (!currentRoles.Contains(EditInput.Role))
+                {
+                    await _userManager.RemoveFromRolesAsync(user, currentRoles);
+                    await _userManager.AddToRoleAsync(user, EditInput.Role);
+                }
+
+                // 4️⃣ Success toast
+                TempData["SuccessMessage"] = "User updated successfully!";
+                return RedirectToPage();
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Unexpected error: " + ex.Message;
+                Console.WriteLine("Exception: " + ex);
+                await LoadDataAsync();
+                return Page();
+            }
+        }
         //Delete
         public async Task<IActionResult> OnPostDeleteAsync(string id)
         {
@@ -118,70 +165,6 @@ namespace SeminarBookingSystem.Pages.UserManagements
             return RedirectToPage();
         }
 
-        //Edit Post
-        public async Task<IActionResult> OnPostEditAsync()
-        {
-            Console.WriteLine("OnPostEditAsync called");
-
-            if (!ModelState.IsValid)
-            {
-                var errors = string.Join(", ", ModelState.Values
-                                                      .SelectMany(v => v.Errors)
-                                                      .Select(e => e.ErrorMessage));
-                Console.WriteLine("ModelState invalid: " + errors);
-
-                await LoadDataAsync();
-                return Page();
-            }
-
-            Console.WriteLine($"EditInput.Id = {EditInput.Id}");
-            Console.WriteLine($"EditInput.FullName = {EditInput.FullName}");
-            Console.WriteLine($"EditInput.Email = {EditInput.Email}");
-            Console.WriteLine($"EditInput.Role = {EditInput.Role}");
-
-            var user = await _userManager.FindByIdAsync(EditInput.Id);
-
-            if (user == null)
-            {
-                Console.WriteLine("User not found!");
-                return RedirectToPage();
-            }
-
-            // Update basic info
-            Console.WriteLine("Updating user info...");
-            user.FullName = EditInput.FullName;
-            user.Email = EditInput.Email;
-            user.UserName = EditInput.Email;
-
-            var updateResult = await _userManager.UpdateAsync(user);
-
-            if (!updateResult.Succeeded)
-            {
-                foreach (var error in updateResult.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                    Console.WriteLine("Update error: " + error.Description);
-                }
-
-                await LoadDataAsync();
-                return Page();
-            }
-
-            // Update role
-            var currentRoles = await _userManager.GetRolesAsync(user);
-            Console.WriteLine("Current roles: " + string.Join(", ", currentRoles));
-
-            await _userManager.RemoveFromRolesAsync(user, currentRoles);
-            Console.WriteLine($"Removed roles: {string.Join(", ", currentRoles)}");
-
-            await _userManager.AddToRoleAsync(user, EditInput.Role);
-            Console.WriteLine($"Added role: {EditInput.Role}");
-
-            TempData["Message"] = "User updated successfully!";
-            Console.WriteLine("User updated successfully!");
-
-            return RedirectToPage();
-        }
         public class EditAdminInput
         {
             public string Id { get; set; } = string.Empty;
