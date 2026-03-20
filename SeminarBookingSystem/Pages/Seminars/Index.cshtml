@@ -1,0 +1,80 @@
+﻿@page "/Seminars/Index"
+@model SeminarBookingSystem.Pages.Seminars.IndexModel
+
+@{
+    Layout = "_MainLayout";
+    ViewData["Title"] = "Seminars";
+}
+
+<link rel="stylesheet" href="~/css/seminar.css" asp-append-version="true" />
+
+<div class="seminar-container">
+    <div class="header-section">
+        <div class="title-group">
+            <h1>Seminars</h1>
+            <p>Manage seminar events and schedules</p>
+        </div>
+        <div>
+            <a asp-page="Create" class="btn-create">+ Create Seminar</a>
+        </div>
+    </div>
+
+    <div class="filter-bar">
+        <div class="search-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="searchInput" placeholder="Search users...">
+        </div>
+        <select class="status-dropdown">
+            <option>All Statuses</option>
+        </select>
+        <div class="filter-checkbox">
+            <label class="checkbox-container">
+                <input type="checkbox">
+                <span class="checkmark"></span>
+                Show deleted seminars
+            </label>
+        </div>
+    </div>
+
+    <div class="seminar-grid">
+        @foreach (var item in Model.Seminar)
+        {
+            // Logic to calculate progress bar percentage
+            var progress = (item.CurrentParticipants / (double)item.Capacity) * 100;
+
+            <div class="seminar-card">
+                <div class="card-header">
+                    <h3>@item.SeminarTitle</h3>
+                    <span class="badge @(item.Status?.ToLower() ?? "unknown")">
+                        @(item.Status ?? "No Status")
+                    </span>
+                </div>
+                <p class="description">@item.Description</p>
+
+                <div class="details">
+                    <div class="detail-item"><i class="bi bi-calendar"></i> @item.Date.ToShortDateString()</div>
+                    <div class="detail-item"><i class="bi bi-clock"></i> @item.Time</div>
+                    <div class="detail-item"><i class="bi bi-geo-alt-fill"></i> @item.Location</div>
+                    <div class="detail-item"><i class="bi bi-people"></i> @item.CurrentParticipants/@item.Capacity
+                        participants (@progress% full)
+                    </div>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: @(progress)%"></div>
+                </div>
+
+                <div class="card-actions">
+                    <a asp-page="./Edit" asp-route-id="@item.Id" class="btn-edit">
+                        <i class="fa-regular fa-pen-to-square"></i>
+                        Edit
+                    </a>
+                    <a asp-page="./Delete" asp-route-id="@item.Id" class="btn-delete">
+                        <i class="fa-regular fa-trash-can"></i>
+                        Delete
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+</div>

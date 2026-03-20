@@ -12,5 +12,6 @@
     public string? Status { get; set; } // e.g. "Upcoming", "Ongoing", "Completed", "Cancelled"
     public int CurrentParticipants { get; set; } // count of bookings
     public bool IsDeleted { get; set; } // for soft delete
+    public DateTime CreatedAt { get; set; }
   }
 }

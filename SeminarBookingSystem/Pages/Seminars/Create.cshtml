@@ -1,0 +1,93 @@
+﻿@page
+@model SeminarBookingSystem.Pages.Seminars.CreateModel
+
+@{
+    Layout = "_MainLayout";
+    ViewData["Title"] = "Create New Seminar";
+}
+<link rel="stylesheet" href="~/css/seminar-create.css" asp-append-version="true" />
+
+<div class="form-page-container">
+    <div class="top-nav">
+        <a asp-page="Index" class="back-link">
+            <span class="arrow"><i class="bi bi-arrow-left"></i> Back</span>
+        </a>
+        <div class="header-text">
+            <h1>Create New Seminar</h1>
+            <p>Add a new seminar event</p>
+        </div>
+    </div>
+
+    <div class="form-card">
+        <div class="form-card-header">
+            <h2>Seminar Information</h2>
+            <p>Fill in the details for the seminar event</p>
+        </div>
+
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label asp-for="Seminar.SeminarTitle">Seminar Title <span class="required">*</span></label>
+                    <input asp-for="Seminar.SeminarTitle" placeholder="e.g., Digital Marketing Strategies 2026" />
+                    <span asp-validation-for="Seminar.SeminarTitle" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label asp-for="Seminar.Description">Description <span class="required">*</span></label>
+                    <textarea asp-for="Seminar.Description" rows="3"
+                              placeholder="Enter a detailed description of the seminar..."></textarea>
+                    <span asp-validation-for="Seminar.Description" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label asp-for="Seminar.Date">Date <span class="required">*</span></label>
+                    <input asp-for="Seminar.Date" type="date" />
+                    <span asp-validation-for="Seminar.Date" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Seminar.Time">Time <span class="required">*</span></label>
+                    <input asp-for="Seminar.Time" type="time" />
+                    <span asp-validation-for="Seminar.Time" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label asp-for="Seminar.Location">Location <span class="required">*</span></label>
+                    <input asp-for="Seminar.Location" placeholder="e.g., Grand Conference Hall, Building A" />
+                    <span asp-validation-for="Seminar.Location" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label asp-for="Seminar.Capacity">Capacity <span class="required">*</span></label>
+                    <input asp-for="Seminar.Capacity" type="number" placeholder="50" />
+                    <span asp-validation-for="Seminar.Capacity" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Seminar.Status">Status <span class="required">*</span></label>
+                    <select asp-for="Seminar.Status">
+                        <option value="Upcoming">Upcoming</option>
+                        <option value="Ongoing">Ongoing</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                    <span asp-validation-for="Seminar.Status" class="text-danger"></span>
+                </div>
+            </div>
+    
+            <div class="form-actions">
+                <button type="submit" class="btn-save">
+                    <span class="save-icon"><i class="bi bi-floppy"></i></span> Create Seminar
+                </button>
+                <a asp-page="Index" class="btn-cancel">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

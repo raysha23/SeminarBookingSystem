@@ -1,0 +1,76 @@
+﻿@page "/Participants/Index"
+@model SeminarBookingSystem.Pages.Participants.IndexModel
+
+@{
+    Layout = "_MainLayout";
+    ViewData["Title"] = "Participants";
+}
+<link rel="stylesheet" href="~/css/participant.css" asp-append-version="true" />
+
+<div class="page-container">
+    <div class="header-section">
+        <div class="title-group">
+            <h1>Participants</h1>
+            <p>Manage participant bookings</p>
+        </div>
+        <a asp-page="Create" class="btn-primary-dark">+ Add Participant</a>
+    </div>
+
+    <div class="filter-card">
+        <div class="search-input">
+            <span class="icon">🔍</span>
+            <input type="text" placeholder="Search participants..." />
+        </div>
+        <select class="custom-select">
+            <option>All Seminars</option>
+        </select>
+        <label class="checkbox-label">
+            <input type="checkbox" />
+            <span class="custom-checkbox"></span>
+            Show deleted participants
+        </label>
+    </div>
+
+    <div class="list-container">
+        <div class="list-header">
+            <h2>Participant List</h2>
+            <span class="count">@Model.Participant.Count participants</span>
+        </div>
+
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Seminar</th>
+                    <th>Contact</th>
+                    <th>Organization</th>
+                    <th>Booked At</th>
+                    <th class="text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Participant)
+                {
+                    <tr>
+                        <td class="font-bold">@item.FullName</td>
+                        <td class="text-muted">Digital Marketing Strategies 2026</td> @* Replace with item.Seminar.Title if available *@
+                        <td>
+                            <div class="contact-info">
+                                <span>📧 @item.Email</span>
+                                <span>📞 @item.ContactNumber</span>
+                            </div>
+                        </td>
+                        <td class="text-muted">
+                            🏢 Tech Solutions Inc. @* Replace with item.Organization if available *@
+                        </td>
+                        <td class="text-muted">Mar 11, 2026 17:30</td>
+                        <td class="text-right">
+                            <a asp-page="./Edit" asp-route-id="@item.Id" class="action-icon edit">📝</a>
+                            <a asp-page="./Delete" asp-route-id="@item.Id" class="action-icon delete">🗑️</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

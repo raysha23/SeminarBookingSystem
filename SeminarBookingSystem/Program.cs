@@ -80,7 +80,8 @@ using (var scope = app.Services.CreateScope())
 {
   var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AdminUser>>();
   var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-  await DbInitializer.SeedData(userManager, roleManager);
+  var context = scope.ServiceProvider.GetRequiredService<SeminarBookingSystemContext>();
+  await DbInitializer.SeedData(userManager, roleManager, context);
 }
 
 app.Run();

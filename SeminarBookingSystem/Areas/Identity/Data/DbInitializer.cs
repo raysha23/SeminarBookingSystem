@@ -1,11 +1,16 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using SeminarBookingSystem.Models;
+using SeminarBookingSystem.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace SeminarBookingSystem.Areas.Identity.Data
 {
   public static class DbInitializer
   {
-    public static async Task SeedData(UserManager<AdminUser> userManager, RoleManager<IdentityRole> roleManager)
+    public static async Task SeedData(
+        UserManager<AdminUser> userManager,
+        RoleManager<IdentityRole> roleManager,
+        SeminarBookingSystemContext context)
     {
       // 1️⃣ Seed roles
       string[] roles = { "Super Admin", "Staff Admin" };
@@ -36,45 +41,79 @@ namespace SeminarBookingSystem.Areas.Identity.Data
         var createResult = await userManager.CreateAsync(adminUser, "Admin123!");
         if (createResult.Succeeded)
         {
-          Console.WriteLine("Admin user created successfully.");
-
-          // ✅ Explicitly confirm email
           adminUser.EmailConfirmed = true;
           await userManager.UpdateAsync(adminUser);
-          Console.WriteLine("Admin email confirmed.");
 
-          // ✅ Assign Super Admin role
           await userManager.AddToRoleAsync(adminUser, "Super Admin");
-          Console.WriteLine("Admin assigned to Super Admin role.");
-        }
-        else
-        {
-          Console.WriteLine("Failed to create admin user:");
-          foreach (var error in createResult.Errors)
-          {
-            Console.WriteLine($" - {error.Description}");
-          }
+          Console.WriteLine("Admin created and assigned role.");
         }
       }
       else
       {
-        // User already exists, ensure email is confirmed and role assigned
         if (!adminUser.EmailConfirmed)
         {
           adminUser.EmailConfirmed = true;
           await userManager.UpdateAsync(adminUser);
-
-          Console.WriteLine("Admin email confirmed (existing user).");
         }
 
         var rolesForUser = await userManager.GetRolesAsync(adminUser);
         if (!rolesForUser.Contains("Super Admin"))
         {
           await userManager.AddToRoleAsync(adminUser, "Super Admin");
-          Console.WriteLine("Admin assigned to Super Admin role (existing user).");
         }
+      }
 
-        Console.WriteLine("Admin user already exists.");
+      // 3️⃣ Seed seminars
+      if (!await context.Seminar.AnyAsync())
+      {
+        var seminars = new List<Seminar>
+                {
+                    new Seminar
+                    {
+                        SeminarTitle = "Web Development Basics",
+                        Description = "Learn HTML, CSS, and JavaScript fundamentals.",
+                        Date = DateTime.UtcNow.AddDays(7),
+                        Time = "10:00 AM", // ✅ added
+                        Location = "Conference Room A",
+                        Capacity = 50,
+                        Status = "Upcoming", // ✅ IMPORTANT
+                        CurrentParticipants = 0, // ✅ IMPORTANT
+                        CreatedAt = DateTime.UtcNow
+                    },
+                    new Seminar
+                    {
+                        SeminarTitle = "C# and .NET Fundamentals",
+                        Description = "Introduction to C# programming and .NET framework.",
+                        Date = DateTime.UtcNow.AddDays(10),
+                        Time = "1:00 PM",
+                        Location = "Conference Room B",
+                        Capacity = 40,
+                        Status = "Upcoming",
+                        CurrentParticipants = 0,
+                        CreatedAt = DateTime.UtcNow
+                    },
+                    new Seminar
+                    {
+                        SeminarTitle = "Database Management with SQL",
+                        Description = "Learn how to design and query databases.",
+                        Date = DateTime.UtcNow.AddDays(14),
+                        Time = "3:00 PM",
+                        Location = "Conference Room C",
+                        Capacity = 60,
+                        Status = "Upcoming",
+                        CurrentParticipants = 0,
+                        CreatedAt = DateTime.UtcNow
+                    }
+                };
+
+        await context.Seminar.AddRangeAsync(seminars);
+        await context.SaveChangesAsync();
+
+        Console.WriteLine("Seminars seeded successfully.");
+      }
+      else
+      {
+        Console.WriteLine("Seminars already exist.");
       }
     }
   }

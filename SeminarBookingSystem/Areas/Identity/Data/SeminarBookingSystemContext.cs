@@ -19,4 +19,8 @@ public class SeminarBookingSystemContext : IdentityDbContext<AdminUser>
         // For example, you can rename the ASP.NET Identity table names and more.
         // Add your customizations after calling base.OnModelCreating(builder);
     }
+
+public DbSet<SeminarBookingSystem.Models.Seminar> Seminar { get; set; } = default!;
+
+public DbSet<SeminarBookingSystem.Models.Participant> Participant { get; set; } = default!;
 }
