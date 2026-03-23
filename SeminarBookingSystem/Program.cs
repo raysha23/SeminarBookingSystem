@@ -1,87 +1,98 @@
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using SeminarBookingSystem.Areas.Identity.Data;
 using SeminarBookingSystem.Data;
 using SeminarBookingSystem.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// ✅ Connection string
 var connectionString = builder.Configuration.GetConnectionString("SeminarBookingSystemContextConnection")
     ?? throw new InvalidOperationException("Connection string not found");
 
-// Add DbContext
+// ✅ Add DbContext
 builder.Services.AddDbContext<SeminarBookingSystemContext>(options =>
     options.UseSqlServer(connectionString));
 
-// Add Identity
+// ✅ Add Identity with Roles
 builder.Services.AddIdentity<AdminUser, IdentityRole>(options =>
 {
-  options.SignIn.RequireConfirmedAccount = false; // Set false for testing login
+    options.SignIn.RequireConfirmedAccount = false; // set false for testing
 })
 .AddEntityFrameworkStores<SeminarBookingSystemContext>()
 .AddDefaultTokenProviders();
 
-// Configure cookie settings
+// ✅ Configure cookie settings
 builder.Services.ConfigureApplicationCookie(options =>
 {
-  options.LoginPath = "/Login";             // Redirect to login if unauthorized
-  options.AccessDeniedPath = "/AccessDenied"; // Optional: for forbidden pages
+    options.LoginPath = "/Login";
+    options.AccessDeniedPath = "/AccessDenied";
+
+    // ⏱ For testing Remember Me (1 minute)
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
+    options.SlidingExpiration = true;
 });
 
-// Add Razor Pages
+// ✅ Register IEmailSender (for forgot password)
+builder.Services.AddTransient<IEmailSender, EmailSender>();
+
+// ✅ Add Razor Pages
 builder.Services.AddRazorPages(options =>
 {
-  options.Conventions.AuthorizeFolder("/");           // Protect all pages
-  options.Conventions.AllowAnonymousToPage("/Login"); // Allow login page
+    options.Conventions.AuthorizeFolder("/");           // Protect all pages
+    options.Conventions.AllowAnonymousToPage("/Login"); // Allow login
+    options.Conventions.AllowAnonymousToPage("/Identity/Account/ForgotPassword"); // Allow forgot password
 });
 
+// ✅ Build app
 var app = builder.Build();
 
-// Middleware
+// ✅ Middleware
 if (!app.Environment.IsDevelopment())
 {
-  app.UseExceptionHandler("/Error");
-  app.UseHsts();
+    app.UseExceptionHandler("/Error");
+    app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-// Authentication & Authorization
-app.UseAuthentication(); // Must come before UseAuthorization
+app.UseAuthentication();
 app.UseAuthorization();
 
-// Force login if not authenticated (extra safety)
+// ✅ Force login if not authenticated
 app.Use(async (context, next) =>
 {
-  // If user is not logged in and not already at /Login, redirect to /Login
-  if (!context.User.Identity.IsAuthenticated &&
-      !context.Request.Path.StartsWithSegments("/Login"))
-  {
-    context.Response.Redirect("/Login");
-    return;
-  }
+    if (!context.User.Identity.IsAuthenticated &&
+        !context.Request.Path.StartsWithSegments("/Login") &&
+        !context.Request.Path.StartsWithSegments("/Identity"))
+    {
+        context.Response.Redirect("/Login");
+        return;
+    }
 
-  // If user is logged in and is at root, redirect to dashboard
-  if (context.User.Identity.IsAuthenticated && context.Request.Path == "/")
-  {
-    context.Response.Redirect("/Dashboard");
-    return;
-  }
+    if (context.User.Identity.IsAuthenticated && context.Request.Path == "/")
+    {
+        context.Response.Redirect("/Dashboard");
+        return;
+    }
 
-  await next();
+    await next();
 });
 
-// Map Razor Pages
+// ✅ Map Razor Pages
 app.MapRazorPages();
 
-// Seed roles/users
+// ✅ Seed roles, admin, and seminars
 using (var scope = app.Services.CreateScope())
 {
-  var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AdminUser>>();
-  var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-  var context = scope.ServiceProvider.GetRequiredService<SeminarBookingSystemContext>();
-  await DbInitializer.SeedData(userManager, roleManager, context);
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AdminUser>>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var context = scope.ServiceProvider.GetRequiredService<SeminarBookingSystemContext>();
+
+    await DbInitializer.SeedData(userManager, roleManager, context);
 }
 
 app.Run();

@@ -103,19 +103,18 @@
             <h3>Quick Actions</h3>
             <p>Common tasks</p>
         </div>
-
         <div class="quick-actions-grid">
-            <button class="action-btn">
+            <button class="action-btn" onclick="location.href='@Url.Page("/Seminars/Create")'">
                 <i class="fa-regular fa-calendar-plus"></i>
                 <span>Create Seminar</span>
             </button>
 
-            <button class="action-btn">
+            <button class="action-btn" onclick="location.href='@Url.Page("/Participants/Add")'">
                 <i class="fa-solid fa-user-plus"></i>
                 <span>Add Participant</span>
             </button>
 
-            <button class="action-btn">
+            <button class="action-btn" onclick="location.href='@Url.Page("/Logs/View")'">
                 <i class="fa-solid fa-pulse"></i>
                 <span>View Logs</span>
             </button>
