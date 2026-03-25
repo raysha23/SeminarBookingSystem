@@ -1,6 +1,117 @@
-﻿@page 
+﻿@page
 @model SeminarBookingSystem.Pages.ActivityLogsModel
 @{
-	Layout = "_MainLayout";
+    Layout = "_MainLayout";
 }
-<h1>TESTING!</h1>
+
+<link rel="stylesheet" href="~/css/activitylogs.css" />
+
+<div class="activity-page">
+    <div class="header-section">
+        <h1>Activity Logs</h1>
+        <p class="subtitle">Track all admin actions and system changes</p>
+    </div>
+
+    <div class="filter-card">
+        <div class="search-wrapper">
+            <i class="bi bi-search"></i>
+            <input type="text" placeholder="Search logs..." id="searchLogs">
+        </div>
+        <select class="log-dropdown" id="actionFilter">
+            <option value="">All Actions</option>
+            <option value="created">Created</option>
+            <option value="updated">Updated</option>
+            <option value="deleted">Deleted</option>
+        </select>
+        <select class="log-dropdown" id="entityFilter">
+            <option value="">All Entities</option>
+            <option value="seminar">Seminar</option>
+            <option value="user">User</option>
+        </select>
+    </div>
+
+    <div class="main-log-card">
+        <div class="card-header">
+            <h3>Activity Log</h3>
+            <span>@Model.Logs.Count log entries found</span>
+        </div>
+
+        @if (!Model.Logs.Any())
+        {
+            <div class="empty-state-container">
+                <div class="empty-state-content">
+                    <i class="bi bi-activity"></i>
+                    <p>No activity logs found</p>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="log-table">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>User</th>
+                            <th>Action</th>
+                            <th>Entity</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var log in Model.Logs)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="timestamp-cell">
+                                        <i class="bi bi-calendar3"></i>
+                                        <div>
+                                            <div class="date">@log.Timestamp.ToString("MMM dd, yyyy")</div>
+                                            <div class="time">@log.Timestamp.ToString("HH:mm:ss")</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="user-name">@log.UserId</div>
+                                    <div class="sub-text">ID: @log.UserId</div>
+                                </td>
+                                <td>
+                                    <span class="badge-action @log.Action.ToLower()">
+                                        @log.Action.ToLower()
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge-entity @log.Entity.ToLower()">
+                                        @log.Entity.ToLower()
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="detail-main">@log.Details</div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">@Model.TotalActivities</div>
+            <div class="stat-label">Total Activities</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number green">@Model.CreatedCount</div>
+            <div class="stat-label">Created</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number blue">@Model.UpdatedCount</div>
+            <div class="stat-label">Updated</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number red">@Model.DeletedCount</div>
+            <div class="stat-label">Deleted</div>
+        </div>
+    </div>
+</div>

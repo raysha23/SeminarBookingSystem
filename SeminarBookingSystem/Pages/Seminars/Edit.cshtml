@@ -84,15 +84,15 @@
             </div>
 
             <input type="hidden" asp-for="Seminar.CurrentParticipants" />
-            <div class="form-group form-check" style="margin-top: 10px;">
+            @* <div class="form-group form-check" style="margin-top: 10px;">
                 <label class="checkbox-label">
                     <input type="checkbox" asp-for="Seminar.IsDeleted" />
                     Mark as Deleted
                 </label>
-            </div>
+            </div> *@
 
             <div class="form-actions">
-                <button type="sxubmit" class="btn-save">
+                <button type="submit" class="btn-save">
                     <span class="save-icon">💾</span> Save Changes
                 </button>
                 <a asp-page="./Index" class="btn-cancel">Cancel</a>

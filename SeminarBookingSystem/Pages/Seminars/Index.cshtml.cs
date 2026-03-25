@@ -12,18 +12,62 @@ namespace SeminarBookingSystem.Pages.Seminars
 {
     public class IndexModel : PageModel
     {
-        private readonly SeminarBookingSystem.Data.SeminarBookingSystemContext _context;
+        private readonly SeminarBookingSystemContext _context;
 
-        public IndexModel(SeminarBookingSystem.Data.SeminarBookingSystemContext context)
+        public IndexModel(SeminarBookingSystemContext context)
         {
             _context = context;
         }
 
-        public IList<Seminar> Seminar { get;set; } = default!;
+        public IList<Seminar> Seminar { get; set; } = default!;
 
-        public async Task OnGetAsync()
+        // Get seminars: either deleted or not based on checkbox
+        public async Task OnGetAsync(bool showDeleted = false)
         {
-            Seminar = await _context.Seminar.ToListAsync();
+            if (showDeleted)
+            {
+                Seminar = await _context.Seminar
+                    .Where(s => s.IsDeleted) // only deleted
+                    .ToListAsync();
+            }
+            else
+            {
+                Seminar = await _context.Seminar
+                    .Where(s => !s.IsDeleted) // only active
+                    .ToListAsync();
+            }
+        }
+
+        // Soft delete handler called from the delete modal
+        public async Task<IActionResult> OnPostDeleteAsync(int id)
+        {
+            var seminar = await _context.Seminar.FindAsync(id);
+            if (seminar == null)
+            {
+                return NotFound();
+            }
+
+            // Mark as deleted instead of removing from database
+            seminar.IsDeleted = true;
+
+            _context.Attach(seminar).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
+            // Stay on Index page
+            return RedirectToPage();
+        }
+        public async Task<IActionResult> OnPostRestoreAsync(int id)
+        {
+            var seminar = await _context.Seminar.FindAsync(id);
+            if (seminar != null && seminar.IsDeleted)
+            {
+                seminar.IsDeleted = false;
+                _context.Attach(seminar).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+            }
+
+            // Return success for AJAX requests
+            return new JsonResult(new { success = true });
         }
     }
 }

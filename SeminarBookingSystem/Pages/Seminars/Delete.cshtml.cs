@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -12,9 +9,9 @@ namespace SeminarBookingSystem.Pages.Seminars
 {
     public class DeleteModel : PageModel
     {
-        private readonly SeminarBookingSystem.Data.SeminarBookingSystemContext _context;
+        private readonly SeminarBookingSystemContext _context;
 
-        public DeleteModel(SeminarBookingSystem.Data.SeminarBookingSystemContext context)
+        public DeleteModel(SeminarBookingSystemContext context)
         {
             _context = context;
         }
@@ -22,40 +19,31 @@ namespace SeminarBookingSystem.Pages.Seminars
         [BindProperty]
         public Seminar Seminar { get; set; } = default!;
 
+        // Show seminar details before archiving
         public async Task<IActionResult> OnGetAsync(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var seminar = await _context.Seminar.FirstOrDefaultAsync(m => m.Id == id);
+            if (seminar == null) return NotFound();
 
-            if (seminar == null)
-            {
-                return NotFound();
-            }
-            else
-            {
-                Seminar = seminar;
-            }
+            Seminar = seminar;
             return Page();
         }
 
+        // Soft delete: mark as IsDeleted = true
         public async Task<IActionResult> OnPostAsync(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var seminar = await _context.Seminar.FindAsync(id);
-            if (seminar != null)
-            {
-                Seminar = seminar;
-                _context.Seminar.Remove(Seminar);
-                await _context.SaveChangesAsync();
-            }
+            if (seminar == null) return NotFound();
+
+            // Soft delete
+            seminar.IsDeleted = true;
+
+            _context.Attach(seminar).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
 
             return RedirectToPage("./Index");
         }

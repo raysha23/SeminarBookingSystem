@@ -20,7 +20,8 @@ public class SeminarBookingSystemContext : IdentityDbContext<AdminUser>
         // Add your customizations after calling base.OnModelCreating(builder);
     }
 
-public DbSet<SeminarBookingSystem.Models.Seminar> Seminar { get; set; } = default!;
+    public DbSet<SeminarBookingSystem.Models.Seminar> Seminar { get; set; } = default!;
 
-public DbSet<SeminarBookingSystem.Models.Participant> Participant { get; set; } = default!;
+    public DbSet<SeminarBookingSystem.Models.Participant> Participant { get; set; } = default!;
+    public DbSet<SeminarBookingSystem.Models.ActivityLog> ActivityLog { get; set; } = default!;
 }

@@ -8,6 +8,8 @@
 
 <link rel="stylesheet" href="~/css/seminar.css" asp-append-version="true" />
 
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+<meta name="csrf-token" content="@Antiforgery.GetAndStoreTokens(HttpContext).RequestToken" />
 <div class="seminar-container">
     <div class="header-section">
         <div class="title-group">
@@ -27,54 +29,201 @@
         <select class="status-dropdown">
             <option>All Statuses</option>
         </select>
-        <div class="filter-checkbox">
-            <label class="checkbox-container">
-                <input type="checkbox">
-                <span class="checkmark"></span>
-                Show deleted seminars
-            </label>
-        </div>
+        <form method="get">
+            <div class="filter-checkbox">
+                <label class="checkbox-container">
+                    <input type="checkbox" name="showDeleted" value="true"
+                           @(Request.Query["showDeleted"] == "true" ? "checked" : "")
+                           onchange="this.form.submit()" />
+                    <span class="checkmark"></span>
+                    Show deleted seminars
+                </label>
+            </div>
+        </form>
     </div>
 
     <div class="seminar-grid">
-        @foreach (var item in Model.Seminar)
+        @if (!Model.Seminar.Any())
         {
-            // Logic to calculate progress bar percentage
-            var progress = (item.CurrentParticipants / (double)item.Capacity) * 100;
-
-            <div class="seminar-card">
-                <div class="card-header">
-                    <h3>@item.SeminarTitle</h3>
-                    <span class="badge @(item.Status?.ToLower() ?? "unknown")">
-                        @(item.Status ?? "No Status")
-                    </span>
-                </div>
-                <p class="description">@item.Description</p>
-
-                <div class="details">
-                    <div class="detail-item"><i class="bi bi-calendar"></i> @item.Date.ToShortDateString()</div>
-                    <div class="detail-item"><i class="bi bi-clock"></i> @item.Time</div>
-                    <div class="detail-item"><i class="bi bi-geo-alt-fill"></i> @item.Location</div>
-                    <div class="detail-item"><i class="bi bi-people"></i> @item.CurrentParticipants/@item.Capacity
-                        participants (@progress% full)
-                    </div>
-                </div>
-
-                <div class="progress-container">
-                    <div class="progress-bar" style="width: @(progress)%"></div>
-                </div>
-
-                <div class="card-actions">
-                    <a asp-page="./Edit" asp-route-id="@item.Id" class="btn-edit">
-                        <i class="fa-regular fa-pen-to-square"></i>
-                        Edit
-                    </a>
-                    <a asp-page="./Delete" asp-route-id="@item.Id" class="btn-delete">
-                        <i class="fa-regular fa-trash-can"></i>
-                        Delete
-                    </a>
+            <div class="no-seminars-container">
+                <div class="no-seminars-content">
+                    <i class="bi bi-calendar4-event"></i>
+                    <p>No seminars found</p>
                 </div>
             </div>
         }
+        else
+        {
+            @foreach (var item in Model.Seminar)
+            {
+                var progress = (item.CurrentParticipants / (double)item.Capacity) * 100;
+                var isDeleted = item.IsDeleted;
+
+                <div class="seminar-card @(isDeleted ? "deleted" : "")">
+                    <div class="card-header">
+                        <h3>@item.SeminarTitle</h3>
+                        <span class="badge @(item.Status?.ToLower() ?? "unknown")">
+                            @(item.Status ?? "No Status")
+                        </span>
+                    </div>
+                    <p class="description">@item.Description</p>
+
+                    <div class="details">
+                        <div class="detail-item"><i class="bi bi-calendar"></i> @item.Date.ToShortDateString()</div>
+                        <div class="detail-item"><i class="bi bi-clock"></i> @item.Time</div>
+                        <div class="detail-item"><i class="bi bi-geo-alt-fill"></i> @item.Location</div>
+                        <div class="detail-item">
+                            <i class="bi bi-people"></i> @item.CurrentParticipants/@item.Capacity participants (@progress% full)
+                        </div>
+                    </div>
+
+                    <div class="progress-container">
+                        <div class="progress-bar" style="width: @(progress)%"></div>
+                    </div>
+
+                    <div class="card-actions">
+                        @if (!isDeleted)
+                        {
+                            <a asp-page="./Edit" asp-route-id="@item.Id" class="btn-edit">
+                                <i class="fa-regular fa-pen-to-square"></i>
+                                Edit
+                            </a>
+                            <a href="#" class="btn-delete" data-id="@item.Id">
+                                <i class="fa-regular fa-trash-can"></i> Delete
+                            </a>
+                        }
+                        else
+                        {
+                            <form method="post" asp-page-handler="Restore">
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <button class="btn-restore" data-id="@item.Id">
+                                    <i class="fa-solid fa-rotate-left"></i>
+                                    Restore
+                                </button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            }
+        }
     </div>
 </div>
+
+
+<!-- Hidden form for soft delete -->
+<form id="deleteForm" method="post">
+    <input type="hidden" name="id" id="deleteUserId" />
+</form>
+
+<!-- DELETE CONFIRM MODAL -->
+<div class="modal delete-modal" id="deleteModal">
+    <div class="modal-content delete-modal-content">
+        <h2>Delete Seminar</h2>
+        <p>Are you sure you want to delete this seminar? This is a soft delete and can be restored later.</p>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-cancel-delete">Cancel</button>
+            <button type="button" class="btn btn-delete-confirm">Delete</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const deleteModal = document.getElementById("deleteModal");
+        const cancelDeleteBtn = deleteModal.querySelector(".btn-cancel-delete");
+        const confirmDeleteBtn = deleteModal.querySelector(".btn-delete-confirm");
+        const deleteForm = document.getElementById("deleteForm");
+        const deleteUserIdInput = document.getElementById("deleteUserId");
+        const showDeletedCheckbox = document.querySelector('input[name="showDeleted"]');
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+        let selectedSeminarId = null;
+
+        // -------------------------
+        // Event delegation for Delete buttons
+        // -------------------------
+        document.addEventListener("click", (e) => {
+            const deleteBtn = e.target.closest(".btn-delete");
+            if (deleteBtn) {
+                e.preventDefault();
+                selectedSeminarId = deleteBtn.dataset.id;
+                deleteModal.classList.add("show");
+            }
+        });
+
+        // Cancel delete
+        cancelDeleteBtn.addEventListener("click", () => {
+            deleteModal.classList.remove("show");
+            selectedSeminarId = null;
+        });
+
+        // Confirm soft delete
+        confirmDeleteBtn.addEventListener("click", () => {
+            if (!selectedSeminarId) return;
+            deleteUserIdInput.value = selectedSeminarId;
+            deleteForm.action = "?handler=Delete";
+            deleteForm.submit();
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener("click", (e) => {
+            if (e.target === deleteModal) {
+                deleteModal.classList.remove("show");
+                selectedSeminarId = null;
+            }
+        });
+
+        // -------------------------
+        // Event delegation for Restore buttons
+        // -------------------------
+        document.addEventListener("click", async (e) => {
+            const restoreBtn = e.target.closest(".btn-restore");
+            if (!restoreBtn) return;
+
+            e.preventDefault();
+            const seminarId = restoreBtn.dataset.id;
+            if (!seminarId) return;
+
+            const refreshPage = showDeletedCheckbox.checked;
+
+            const formData = new FormData();
+            formData.append("id", seminarId);
+
+            try {
+                const response = await fetch("?handler=Restore", {
+                    method: "POST",
+                    headers: {
+                        "RequestVerificationToken": csrfToken
+                    },
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error("Restore failed");
+
+                if (refreshPage) {
+                    // Refresh page keeping checkbox checked
+                    const query = showDeletedCheckbox.checked ? "?showDeleted=true" : "";
+                    window.location.href = window.location.pathname + query;
+                } else {
+                    // Dynamically update UI: remove deleted class and restore Edit/Delete buttons
+                    const card = restoreBtn.closest(".seminar-card");
+                    card.classList.remove("deleted");
+
+                    const cardActions = card.querySelector(".card-actions");
+                    cardActions.innerHTML = `
+                        <a href="/Seminars/Edit?id=${seminarId}" class="btn-edit">
+                            <i class="fa-regular fa-pen-to-square"></i>
+                            Edit
+                        </a>
+                        <a href="#" class="btn-delete" data-id="${seminarId}">
+                            <i class="fa-regular fa-trash-can"></i> Delete
+                        </a>
+                    `;
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Failed to restore seminar.");
+            }
+        });
+    });
+</script>
