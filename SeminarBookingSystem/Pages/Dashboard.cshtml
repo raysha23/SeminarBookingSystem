@@ -1,6 +1,4 @@
-﻿@* File Path: SeminarBookingSystem/Pages/Dashboard.cshtml *@
-
-@page "/Dashboard"
+﻿@page
 @model SeminarBookingSystem.Pages.DashboardModel
 @{
     Layout = "_MainLayout";
@@ -18,34 +16,16 @@
         <div class="card">
             <div class="card-text">
                 <h3>Total Seminars</h3>
-                <span class="stat-number">3</span>
-                <p class="stat-detail">3 upcoming</p>
+                <span class="stat-number">@Model.TotalSeminars</span>
+                <p class="stat-detail">@Model.UpcomingSeminars.Count upcoming</p>
             </div>
             <div class="card-icon blue"><i class="bi bi-calendar"></i></div>
         </div>
 
-        @* <div class="card">
-            <div class="card-text">
-                <h3>Total Bookings</h3>
-                <span class="stat-number">3</span>
-                <p class="stat-detail">222 slots available</p>
-            </div>
-            <div class="card-icon green"><i class="fa-solid fa-calendar-check"></i></div>
-        </div>
-
-        <div class="card">
-            <div class="card-text">
-                <h3>Participants</h3>
-                <span class="stat-number">3</span>
-                <p class="stat-detail">Active participants</p>
-            </div>
-            <div class="card-icon purple"><i class="fa-solid fa-users"></i></div>
-        </div> *@
-
         <div class="card">
             <div class="card-text">
                 <h3>Activities</h3>
-                <span class="stat-number">0</span>
+                <span class="stat-number">@Model.TotalActivities</span>
                 <p class="stat-detail">Total admin actions</p>
             </div>
             <div class="card-icon orange"><i class="bi bi-activity"></i></div>
@@ -59,31 +39,28 @@
                 <p>Next scheduled events</p>
             </div>
             <div class="scrollable-content">
-
                 <div class="seminar-list">
-                    <div class="seminar-item">
-                        <div class="seminar-info">
-                            <h4>Digital Marketing Strategies 2026</h4>
-                            <p class="location">Grand Conference Hall, Building A</p>
-                            <p class="date">Apr 15, 2026</p>
-                        </div>
-                        <div class="seminar-meta">
-                            <span class="badge">upcoming</span>
-                            <p class="booked">2/100 booked</p>
-                        </div>
-                    </div>
-
-                    <div class="seminar-item">
-                        <div class="seminar-info">
-                            <h4>Leadership and Team Management</h4>
-                            <p class="location">Room 205, Training Center</p>
-                            <p class="date">Mar 20, 2026</p>
-                        </div>
-                        <div class="seminar-meta">
-                            <span class="badge">upcoming</span>
-                            <p class="booked">1/50 booked</p>
-                        </div>
-                    </div>
+                    @if (!Model.UpcomingSeminars.Any())
+                    {
+                        <p>No upcoming seminars</p>
+                    }
+                    else
+                    {
+                        @foreach (var seminar in Model.UpcomingSeminars)
+                        {
+                            <div class="seminar-item">
+                                <div class="seminar-info">
+                                    <h4>@seminar.SeminarTitle</h4>
+                                    <p class="location">@seminar.Location</p>
+                                    <p class="date">@seminar.Date.ToString("MMM dd, yyyy")</p>
+                                </div>
+                                <div class="seminar-meta">
+                                    <span class="badge">@seminar.Status</span>
+                                    <p class="booked">@seminar.CurrentParticipants/@seminar.Capacity booked</p>
+                                </div>
+                            </div>
+                        }
+                    }
                 </div>
             </div>
         </section>
@@ -93,11 +70,38 @@
                 <h2>Recent Activity</h2>
                 <p>Latest admin actions</p>
             </div>
-            <div class="empty-state">
-                <p>No recent activity</p>
+            <div class="scrollable-content">
+                @if (!Model.RecentActivities.Any())
+                {
+                    <div class="empty-state">
+                        <p>No recent activity</p>
+                    </div>
+                }
+                else
+                {
+                    <ul class="activity-list">
+                        <div class="activity-list">
+                            @foreach (var log in Model.RecentActivities)
+                            {
+                                <div class="activity-item">
+                                    <div class="activity-top">
+                                        <span class="activity-user">@log.UserId</span>
+                                        <span class="activity-time">@log.Timestamp.ToString("MMM dd, HH:mm")</span>
+                                    </div>
+                                    <p class="activity-details">@log.Details</p>
+                                    <div class="activity-badges">
+                                        <span class="badge-action @log.Action.ToLower()">@log.Action.ToLower()</span>
+                                        <span class="badge-entity @log.Entity.ToLower()">@log.Entity.ToLower()</span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </ul>
+                }
             </div>
         </section>
     </div>
+
     <div class="quick-actions-section">
         <div class="section-header">
             <h3>Quick Actions</h3>
@@ -109,17 +113,10 @@
                 <span>Create Seminar</span>
             </button>
 
-            @* <button class="action-btn" onclick="location.href='@Url.Page("/Participants/Add")'">
-                <i class="fa-solid fa-user-plus"></i>
-                <span>Add Participant</span>
-            </button> *@
-
-            <button class="action-btn" onclick="location.href='@Url.Page("/Logs/View")'">
+            <button class="action-btn" onclick="location.href='@Url.Page("ActivityLogs")'">
                 <i class="fa-solid fa-pulse"></i>
                 <span>View Logs</span>
             </button>
         </div>
     </div>
 </div>
-
-         

@@ -146,22 +146,58 @@
 
 /* Table Layout */
 .table-responsive {
-    overflow-x: auto;
     margin-top: 20px;
+    height: 500px; /* Set your desired fixed height here */
+    overflow-y: auto; /* Enable vertical scrolling */
+    overflow-x: auto; /* Enable horizontal scrolling for small screens */
+    border: 1px solid #edf2f7; /* Optional: adds a subtle border around the scroll area */
+    border-radius: 8px;
 }
-
 .log-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate; /* Required for sticky header borders to work right */
+    border-spacing: 0;
     font-size: 14px;
 }
-
-    .log-table th {
+    .log-table thead th {
+        position: sticky;
+        top: 0;
+        background-color: #f8fafc;
+        z-index: 5;
         text-align: left;
-        padding: 12px 16px;
-        color: #1a202c;
+        padding: 14px 16px;
         font-weight: 600;
+        color: #4a5568;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    /* ===== TABLE BODY ===== */
+    .log-table tbody td {
+        padding: 16px;
         border-bottom: 1px solid #edf2f7;
+        vertical-align: top;
+    }
+
+    /* ===== ROW HOVER EFFECT (optional but nice) ===== */
+    .log-table tbody tr:hover {
+        background-color: #f9fafb;
+    }
+/* 4. Custom Scrollbar Styling (Optional - makes it look modern) */
+.table-responsive::-webkit-scrollbar {
+    width: 6px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+    .table-responsive::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
     }
 
     .log-table td {
@@ -176,6 +212,7 @@
     gap: 10px;
     align-items: flex-start;
     color: #718096;
+    width: 150px;
 }
 
     .timestamp-cell i {
@@ -204,38 +241,54 @@
     margin-top: 2px;
 }
 
-/* Badges Base */
 .badge-action, .badge-entity {
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 500;
     display: inline-block;
+    padding: 2px 12px;
+    border-radius: 9999px; /* This creates the pill shape */
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-align: center;
 }
 
-    /* Action: Created (Green) */
+    /* Created (Green) */
     .badge-action.created {
         background-color: #dcfce7;
         color: #166534;
         border: 1px solid #bbf7d0;
     }
 
-    /* Entity: Seminar (Blue) */
+    /* Updated (Blue) - matches the image's blue action style */
+    .badge-action.updated {
+        background-color: #dbeafe;
+        color: #1e40af;
+        border: 1px solid #bfdbfe;
+    }
+
+    /* Deleted (Red) */
+    .badge-action.deleted {
+        background-color: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+    }
+
+    /* Seminar (Light Blue/Indigo) */
     .badge-entity.seminar {
         background-color: #eff6ff;
-        color: #1e40af;
+        color: #2563eb;
         border: 1px solid #dbeafe;
     }
 
-    /* Entity: User (Purple) */
+    /* User (Light Purple) */
     .badge-entity.user {
         background-color: #f5f3ff;
-        color: #5b21b6;
+        color: #7c3aed;
         border: 1px solid #ede9fe;
     }
-
-
-
+    .badge-action.restored {
+        background-color: #f5f3ff; /* Very light lavender background */
+        color: #7c3aed; /* Vibrant purple text */
+        border: 1px solid #ede9fe; /* Subtle border to define the shape */
+    }
 
 
 .main-log-card {

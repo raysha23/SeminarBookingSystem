@@ -115,3 +115,91 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const searchInput = document.getElementById("searchLogs");
+        const actionFilter = document.getElementById("actionFilter");
+        const entityFilter = document.getElementById("entityFilter");
+
+        function normalize(text) {
+            return text ? text.toString().toLowerCase().trim() : "";
+        }
+
+        function filterLogs() {
+            const rows = document.querySelectorAll(".log-table tbody tr");
+
+            const searchText = normalize(searchInput.value);
+            const actionValue = normalize(actionFilter.value);
+            const entityValue = normalize(entityFilter.value);
+
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+
+                // ❗ Ignore "No results row"
+                if (row.id === "noResultsRow") return;
+
+                const user = normalize(row.querySelector(".user-name")?.textContent);
+                const action = normalize(row.querySelector(".badge-action")?.textContent);
+                const entity = normalize(row.querySelector(".badge-entity")?.textContent);
+                const details = normalize(row.querySelector(".detail-main")?.textContent);
+
+                // ✅ SEARCH (now includes everything)
+                const matchSearch =
+                    !searchText ||
+                    user.includes(searchText) ||
+                    details.includes(searchText) ||
+                    action.includes(searchText) ||
+                    entity.includes(searchText);
+
+                // ✅ FILTERS (fixed comparison)
+                const matchAction =
+                    !actionValue || action.includes(actionValue);
+
+                const matchEntity =
+                    !entityValue || entity.includes(entityValue);
+
+                if (matchSearch && matchAction && matchEntity) {
+                    row.style.display = "";
+                    visibleCount++;
+                } else {
+                    row.style.display = "none";
+                }
+            });
+
+            toggleNoResults(visibleCount === 0);
+        }
+
+        function toggleNoResults(show) {
+            let noResultRow = document.getElementById("noResultsRow");
+            const tbody = document.querySelector(".log-table tbody");
+
+            if (!tbody) return;
+
+            if (show) {
+                if (!noResultRow) {
+                    noResultRow = document.createElement("tr");
+                    noResultRow.id = "noResultsRow";
+                    noResultRow.innerHTML = `
+                        <td colspan="5" style="text-align:center; padding:20px; color:#94a3b8;">
+                            No matching logs found
+                        </td>
+                    `;
+                    tbody.appendChild(noResultRow);
+                }
+            } else {
+                if (noResultRow) {
+                    noResultRow.remove();
+                }
+            }
+        }
+
+        // ✅ Attach events safely
+        if (searchInput) searchInput.addEventListener("input", filterLogs);
+        if (actionFilter) actionFilter.addEventListener("change", filterLogs);
+        if (entityFilter) entityFilter.addEventListener("change", filterLogs);
+
+    });
+</script>

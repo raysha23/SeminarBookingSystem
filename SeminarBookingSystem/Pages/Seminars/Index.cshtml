@@ -10,6 +10,7 @@
 
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 <meta name="csrf-token" content="@Antiforgery.GetAndStoreTokens(HttpContext).RequestToken" />
+
 <div class="seminar-container">
     <div class="header-section">
         <div class="title-group">
@@ -21,14 +22,20 @@
         </div>
     </div>
 
+    <!-- FILTER BAR -->
     <div class="filter-bar">
         <div class="search-wrapper">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="searchInput" placeholder="Search users...">
+            <input type="text" id="searchInput" placeholder="Search seminars...">
         </div>
-        <select class="status-dropdown">
-            <option>All Statuses</option>
+
+        <select class="status-dropdown" id="statusFilter">
+            <option value="">All Statuses</option>
+            <option value="upcoming">Upcoming</option>
+            <option value="ongoing">Ongoing</option>
+            <option value="completed">Completed</option>
         </select>
+
         <form method="get">
             <div class="filter-checkbox">
                 <label class="checkbox-container">
@@ -42,6 +49,7 @@
         </form>
     </div>
 
+    <!-- SEMINAR GRID -->
     <div class="seminar-grid">
         @if (!Model.Seminar.Any())
         {
@@ -66,12 +74,13 @@
                             @(item.Status ?? "No Status")
                         </span>
                     </div>
+
                     <p class="description">@item.Description</p>
 
                     <div class="details">
                         <div class="detail-item"><i class="bi bi-calendar"></i> @item.Date.ToShortDateString()</div>
                         <div class="detail-item"><i class="bi bi-clock"></i> @item.Time</div>
-                        <div class="detail-item"><i class="bi bi-geo-alt-fill"></i> @item.Location</div>
+                        <div class="detail-item location"><i class="bi bi-geo-alt-fill"></i> @item.Location</div>
                         <div class="detail-item">
                             <i class="bi bi-people"></i> @item.CurrentParticipants/@item.Capacity participants (@progress% full)
                         </div>
@@ -109,13 +118,12 @@
     </div>
 </div>
 
-
-<!-- Hidden form for soft delete -->
+<!-- DELETE FORM -->
 <form id="deleteForm" method="post">
     <input type="hidden" name="id" id="deleteUserId" />
 </form>
 
-<!-- DELETE CONFIRM MODAL -->
+<!-- DELETE MODAL -->
 <div class="modal delete-modal" id="deleteModal">
     <div class="modal-content delete-modal-content">
         <h2>Delete Seminar</h2>
@@ -127,8 +135,13 @@
     </div>
 </div>
 
+<!-- JS -->
 <script>
     document.addEventListener("DOMContentLoaded", () => {
+
+        const searchInput = document.getElementById("searchInput");
+        const statusFilter = document.getElementById("statusFilter");
+
         const deleteModal = document.getElementById("deleteModal");
         const cancelDeleteBtn = deleteModal.querySelector(".btn-cancel-delete");
         const confirmDeleteBtn = deleteModal.querySelector(".btn-delete-confirm");
@@ -139,9 +152,73 @@
 
         let selectedSeminarId = null;
 
-        // -------------------------
-        // Event delegation for Delete buttons
-        // -------------------------
+        function normalize(text) {
+            return text ? text.toLowerCase().trim() : "";
+        }
+
+        function filterSeminars() {
+            const cards = document.querySelectorAll(".seminar-card");
+
+            const searchText = normalize(searchInput.value);
+            const statusValue = normalize(statusFilter.value);
+
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+
+                const title = normalize(card.querySelector("h3")?.textContent);
+                const description = normalize(card.querySelector(".description")?.textContent);
+                const location = normalize(card.querySelector(".location")?.textContent);
+                const status = normalize(card.querySelector(".badge")?.textContent);
+
+                const matchSearch =
+                    !searchText ||
+                    title.includes(searchText) ||
+                    description.includes(searchText) ||
+                    location.includes(searchText);
+
+                const matchStatus =
+                    !statusValue || status.includes(statusValue);
+
+                if (matchSearch && matchStatus) {
+                    card.style.display = "";
+                    visibleCount++;
+                } else {
+                    card.style.display = "none";
+                }
+            });
+
+            toggleNoResults(visibleCount === 0);
+        }
+
+        function toggleNoResults(show) {
+            let existing = document.getElementById("noSeminarResults");
+            const container = document.querySelector(".seminar-grid");
+
+            if (!container) return;
+
+            if (show) {
+                if (!existing) {
+                    const div = document.createElement("div");
+                    div.id = "noSeminarResults";
+                    div.className = "no-seminars-container";
+                    div.innerHTML = `
+                        <div class="no-seminars-content">
+                            <i class="bi bi-search"></i>
+                            <p>No matching seminars found</p>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                }
+            } else {
+                if (existing) existing.remove();
+            }
+        }
+
+        if (searchInput) searchInput.addEventListener("input", filterSeminars);
+        if (statusFilter) statusFilter.addEventListener("change", filterSeminars);
+
+        // DELETE
         document.addEventListener("click", (e) => {
             const deleteBtn = e.target.closest(".btn-delete");
             if (deleteBtn) {
@@ -151,13 +228,11 @@
             }
         });
 
-        // Cancel delete
         cancelDeleteBtn.addEventListener("click", () => {
             deleteModal.classList.remove("show");
             selectedSeminarId = null;
         });
 
-        // Confirm soft delete
         confirmDeleteBtn.addEventListener("click", () => {
             if (!selectedSeminarId) return;
             deleteUserIdInput.value = selectedSeminarId;
@@ -165,7 +240,6 @@
             deleteForm.submit();
         });
 
-        // Close modal when clicking outside
         window.addEventListener("click", (e) => {
             if (e.target === deleteModal) {
                 deleteModal.classList.remove("show");
@@ -173,9 +247,7 @@
             }
         });
 
-        // -------------------------
-        // Event delegation for Restore buttons
-        // -------------------------
+        // RESTORE
         document.addEventListener("click", async (e) => {
             const restoreBtn = e.target.closest(".btn-restore");
             if (!restoreBtn) return;
@@ -201,11 +273,9 @@
                 if (!response.ok) throw new Error("Restore failed");
 
                 if (refreshPage) {
-                    // Refresh page keeping checkbox checked
                     const query = showDeletedCheckbox.checked ? "?showDeleted=true" : "";
                     window.location.href = window.location.pathname + query;
                 } else {
-                    // Dynamically update UI: remove deleted class and restore Edit/Delete buttons
                     const card = restoreBtn.closest(".seminar-card");
                     card.classList.remove("deleted");
 
@@ -225,5 +295,6 @@
                 alert("Failed to restore seminar.");
             }
         });
+
     });
 </script>

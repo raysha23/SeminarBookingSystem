@@ -99,7 +99,7 @@ namespace SeminarBookingSystem.Pages.UserManagements
                 {
                     UserId = User.Identity.Name ?? "System",  // current logged-in admin
                     Action = "Created",
-                    Entity = "AdminUser",
+                    Entity = "User",
                     Details = $"Created admin: {Input.FullName} ({Input.Email}) with role {Input.Role}",
                     Timestamp = DateTime.UtcNow
                 };
@@ -122,7 +122,7 @@ namespace SeminarBookingSystem.Pages.UserManagements
                 {
                     UserId = User.Identity.Name ?? "System",
                     Action = "Error",
-                    Entity = "AdminUser",
+                    Entity = "User",
                     Details = $"Failed to create admin {Input.Email}. Exception: {ex.Message}",
                     Timestamp = DateTime.UtcNow
                 };
@@ -185,7 +185,7 @@ namespace SeminarBookingSystem.Pages.UserManagements
                 {
                     UserId = User.Identity.Name ?? "System",
                     Action = "Updated",
-                    Entity = "AdminUser",
+                    Entity = "User",
                     Details = $"Edited admin: {oldFullName} ({oldEmail}) -> {EditInput.FullName} ({EditInput.Email}), Role: {string.Join(",", oldRoles)} -> {EditInput.Role}",
                     Timestamp = DateTime.UtcNow
                 };
@@ -223,7 +223,7 @@ namespace SeminarBookingSystem.Pages.UserManagements
             {
                 UserId = User.Identity.Name ?? "System",
                 Action = "Deleted",
-                Entity = "AdminUser",
+                Entity = "User",
                 Details = $"Deleted admin: {user.FullName} ({user.Email})",
                 Timestamp = DateTime.UtcNow
             };
@@ -231,7 +231,7 @@ namespace SeminarBookingSystem.Pages.UserManagements
             await _context.SaveChangesAsync();
             // --------------------------
 
-            TempData["Message"] = "User deleted successfully!";
+            TempData["SuccessMessage"] = "User deleted successfully!";
             return RedirectToPage();
         }
 

@@ -47,7 +47,7 @@
             <div class="form-grid">
                 <div class="form-group">
                     <label asp-for="Seminar.Date">Date <span class="required">*</span></label>
-                    <input asp-for="Seminar.Date" type="date" />
+                    <input asp-for="Seminar.Date" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
                     <span asp-validation-for="Seminar.Date" class="text-danger"></span>
                 </div>
                 <div class="form-group">
@@ -71,7 +71,7 @@
                     <input asp-for="Seminar.Capacity" type="number" placeholder="50" />
                     <span asp-validation-for="Seminar.Capacity" class="text-danger"></span>
                 </div>
-                <div class="form-group">
+                @* <div class="form-group">
                     <label asp-for="Seminar.Status">Status <span class="required">*</span></label>
                     <select asp-for="Seminar.Status">
                         <option value="Upcoming">Upcoming</option>
@@ -79,7 +79,7 @@
                         <option value="Completed">Completed</option>
                     </select>
                     <span asp-validation-for="Seminar.Status" class="text-danger"></span>
-                </div>
+                </div> *@
             </div>
     
             <div class="form-actions">

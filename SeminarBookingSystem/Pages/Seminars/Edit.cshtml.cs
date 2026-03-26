@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SeminarBookingSystem.Data;
 using SeminarBookingSystem.Models;
@@ -13,9 +11,9 @@ namespace SeminarBookingSystem.Pages.Seminars
 {
     public class EditModel : PageModel
     {
-        private readonly SeminarBookingSystem.Data.SeminarBookingSystemContext _context;
+        private readonly SeminarBookingSystemContext _context;
 
-        public EditModel(SeminarBookingSystem.Data.SeminarBookingSystemContext context)
+        public EditModel(SeminarBookingSystemContext context)
         {
             _context = context;
         }
@@ -23,24 +21,24 @@ namespace SeminarBookingSystem.Pages.Seminars
         [BindProperty]
         public Seminar Seminar { get; set; } = default!;
 
+        // TempData for success/error alerts
+        [TempData]
+        public string SuccessMessage { get; set; } = string.Empty;
+
+        [TempData]
+        public string ErrorMessage { get; set; } = string.Empty;
+
         public async Task<IActionResult> OnGetAsync(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var seminar =  await _context.Seminar.FirstOrDefaultAsync(m => m.Id == id);
-            if (seminar == null)
-            {
-                return NotFound();
-            }
+            var seminar = await _context.Seminar.FirstOrDefaultAsync(m => m.Id == id);
+            if (seminar == null) return NotFound();
+
             Seminar = seminar;
             return Page();
         }
 
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more information, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
@@ -53,20 +51,54 @@ namespace SeminarBookingSystem.Pages.Seminars
             try
             {
                 await _context.SaveChangesAsync();
+
+                // --- Add Activity Log for Edit/Update ---
+                var log = new ActivityLog
+                {
+                    UserId = User.Identity?.Name ?? "System",
+                    Action = "Updated",
+                    Entity = "Seminar",
+                    Details = $"Updated seminar: {Seminar.SeminarTitle} (ID: {Seminar.Id})",
+                    Timestamp = DateTime.UtcNow
+                };
+                _context.ActivityLog.Add(log);
+                await _context.SaveChangesAsync();
+                // ----------------------------------------
+
+                // TempData success message
+                SuccessMessage = $"Seminar '{Seminar.SeminarTitle}' updated successfully!";
+                return RedirectToPage("./Index");
             }
             catch (DbUpdateConcurrencyException)
             {
                 if (!SeminarExists(Seminar.Id))
                 {
-                    return NotFound();
+                    ErrorMessage = "Seminar not found!";
+                    return RedirectToPage("./Index");
                 }
                 else
                 {
+                    ErrorMessage = "Concurrency error occurred while updating seminar.";
                     throw;
                 }
             }
+            catch (Exception ex)
+            {
+                // Log any other errors
+                var errorLog = new ActivityLog
+                {
+                    UserId = User.Identity?.Name ?? "System",
+                    Action = "Error",
+                    Entity = "Seminar",
+                    Details = $"Failed to update seminar {Seminar.SeminarTitle}. Exception: {ex.Message}",
+                    Timestamp = DateTime.UtcNow
+                };
+                _context.ActivityLog.Add(errorLog);
+                await _context.SaveChangesAsync();
 
-            return RedirectToPage("./Index");
+                ErrorMessage = "Unexpected error: " + ex.Message;
+                return Page();
+            }
         }
 
         private bool SeminarExists(int id)
