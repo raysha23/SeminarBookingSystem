@@ -129,4 +129,4 @@ namespace SeminarBookingSystem.Pages.Seminars
             return new JsonResult(new { success = true });
         }
     }
-}
+}   

@@ -24,7 +24,7 @@ namespace SeminarBookingSystem.Areas.Identity.Data
             }
 
             // 2️⃣ Seed admin user
-            var adminEmail = "admin@seminar.com";
+            var adminEmail = "admin@gmail.com";
             var adminUser = await userManager.FindByEmailAsync(adminEmail);
 
             if (adminUser == null)

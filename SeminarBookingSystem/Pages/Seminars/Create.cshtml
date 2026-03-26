@@ -71,17 +71,8 @@
                     <input asp-for="Seminar.Capacity" type="number" placeholder="50" />
                     <span asp-validation-for="Seminar.Capacity" class="text-danger"></span>
                 </div>
-                @* <div class="form-group">
-                    <label asp-for="Seminar.Status">Status <span class="required">*</span></label>
-                    <select asp-for="Seminar.Status">
-                        <option value="Upcoming">Upcoming</option>
-                        <option value="Ongoing">Ongoing</option>
-                        <option value="Completed">Completed</option>
-                    </select>
-                    <span asp-validation-for="Seminar.Status" class="text-danger"></span>
-                </div> *@
             </div>
-    
+
             <div class="form-actions">
                 <button type="submit" class="btn-save">
                     <span class="save-icon"><i class="bi bi-floppy"></i></span> Create Seminar
@@ -91,3 +82,101 @@
         </form>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const seminarForm = document.querySelector("form");
+        const titleInput = document.getElementById("Seminar_SeminarTitle");
+        const descriptionInput = document.getElementById("Seminar_Description");
+        const dateInput = document.getElementById("Seminar_Date");
+        const timeInput = document.getElementById("Seminar_Time");
+        const locationInput = document.getElementById("Seminar_Location");
+        const capacityInput = document.getElementById("Seminar_Capacity");
+
+        // ===== Helper Functions =====
+        function showError(input, msg) {
+            const span = input.parentElement.querySelector(".text-danger");
+            if (span) span.textContent = msg;
+        }
+
+        function clearError(input) {
+            const span = input.parentElement.querySelector(".text-danger");
+            if (span) span.textContent = "";
+        }
+
+        function isPositiveInteger(value) {
+            return /^\d+$/.test(value) && parseInt(value) > 0;
+        }
+
+        // ===== LIVE INPUT RESTRICTION =====
+        [titleInput, descriptionInput, locationInput].forEach(input => {
+            input.addEventListener("input", function () {
+                // Only letters, numbers, spaces, .,!?- allowed
+                this.value = this.value.replace(/[^a-zA-Z0-9\s.,!?-]/g, '');
+                if (input === titleInput && this.value.length > 50) {
+                    this.value = this.value.slice(0, 50); // Max length 50 for title
+                }
+            });
+        });
+
+        capacityInput.addEventListener("input", function () {
+            // Only digits allowed
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+
+        // ===== FORM SUBMIT VALIDATION =====
+        seminarForm.addEventListener("submit", function (e) {
+            let valid = true;
+
+            [titleInput, descriptionInput, dateInput, timeInput, locationInput, capacityInput].forEach(clearError);
+
+            // Title validation
+            const titleLen = titleInput.value.trim().length;
+            if (!titleInput.value.trim()) {
+                showError(titleInput, "Seminar Title is required.");
+                valid = false;
+            } else if (titleLen < 10 || titleLen > 50) {
+                showError(titleInput, "Title must be 10–50 characters.");
+                valid = false;
+            }
+
+            // Description validation
+            if (!descriptionInput.value.trim()) {
+                showError(descriptionInput, "Description is required.");
+                valid = false;
+            }
+
+            // Date validation
+            if (!dateInput.value) {
+                showError(dateInput, "Date is required.");
+                valid = false;
+            } else if (new Date(dateInput.value) < new Date(new Date().setHours(0,0,0,0))) {
+                showError(dateInput, "Date cannot be in the past.");
+                valid = false;
+            }
+
+            // Time validation
+            if (!timeInput.value) {
+                showError(timeInput, "Time is required.");
+                valid = false;
+            }
+
+            // Location validation
+            if (!locationInput.value.trim()) {
+                showError(locationInput, "Location is required.");
+                valid = false;
+            }
+
+            // Capacity validation
+            if (!capacityInput.value.trim()) {
+                showError(capacityInput, "Capacity is required.");
+                valid = false;
+            } else if (!isPositiveInteger(capacityInput.value.trim())) {
+                showError(capacityInput, "Capacity must be a positive integer.");
+                valid = false;
+            }
+
+            if (!valid) e.preventDefault(); // Prevent form submission if invalid
+        });
+    });
+</script>

@@ -126,14 +126,14 @@
 			<input type="hidden" asp-for="EditInput.Id" id="editId" />
 			<div class="form-group">
 				<label asp-for="Input.FullName"></label>
-				<input asp-for="Input.FullName" class="form-control" placeholder="John Doe" />
-				<span asp-validation-for="Input.FullName" class="text-danger"></span>
+				<input asp-for="Input.FullName" class="form-control" placeholder="John Doe" required/>
+				<span asp-validation-for="Input.FullName" id="fullNameError" class="text-danger"></span>
 			</div>
 
 			<div class="form-group">
 				<label asp-for="Input.Email"></label>
-				<input asp-for="Input.Email" class="form-control" placeholder="john@seminar.com" />
-				<span asp-validation-for="Input.Email" class="text-danger"></span>
+				<input asp-for="Input.Email" class="form-control" placeholder="john@seminar.com" required />
+				<span asp-validation-for="Input.Email" id="emailError" class="text-danger"></span>
 			</div>
 
 			<div class="form-group">
@@ -169,14 +169,14 @@
 
 			<div class="form-group">
 				<label asp-for="EditInput.FullName"></label>
-				<input asp-for="EditInput.FullName" class="form-control" id="EditInput_FullName" />
-				<span asp-validation-for="EditInput.FullName" class="text-danger"></span>
+				<input asp-for="EditInput.FullName" class="form-control" id="EditInput_FullName" required />
+				<span asp-validation-for="EditInput.FullName" id="fullNameError" class="text-danger"></span>
 			</div>
 
 			<div class="form-group">
 				<label asp-for="EditInput.Email"></label>
-				<input asp-for="EditInput.Email" class="form-control" id="EditInput_Email" />
-				<span asp-validation-for="EditInput.Email" class="text-danger"></span>
+				<input asp-for="EditInput.Email" class="form-control" id="EditInput_Email" required />
+				<span asp-validation-for="EditInput.Email" id="emailError" class="text-danger"></span>
 			</div>
 
 			<div class="form-group">
@@ -204,7 +204,7 @@
 <div class="modal" id="deleteModal">
 	<div class="modal-content delete-modal-content">
 		<h2>Delete User</h2>
-		<p>Are you sure you want to delete this admin user? This action will soft delete the user account and prevent them from logging in.</p>
+		<p>Are you sure you want to delete this admin user? This action is permanent and cannot be undone. The user will no longer be able to access the system.</p>
 		<div class="modal-footer">
 			<button type="button" class="btn btn-cancel-delete">Cancel</button>
 			<button type="button" class="btn btn-delete-confirm">Delete</button>
@@ -216,154 +216,4 @@
 	<input type="hidden" name="id" id="deleteUserId" />
 </form>
 
-<script>
-	document.addEventListener("DOMContentLoaded", function () {
-
-		// CREATE MODAL
-		const createModal = document.getElementById("adminModal");
-		const createForm = document.getElementById("adminForm");
-		const openBtn = document.querySelector(".open-modal");
-		const createCloseBtn = createModal.querySelector(".close-btn");
-		const createCancelBtn = createModal.querySelector(".btn-cancel");
-		const createId = document.getElementById("editId");
-		const createFullName = document.getElementById("Input_FullName");
-		const createEmail = document.getElementById("Input_Email");
-		const createRole = document.getElementById("Input_Role");
-
-		openBtn?.addEventListener("click", () => {
-			createModal.classList.add("show");
-			createForm.action = "?handler=CreateAdmin";
-			createFullName.value = "";
-			createEmail.value = "";
-			createRole.value = "Staff Admin";
-			createId.value = "";
-		});
-
-		const closeCreateModal = () => {
-			createModal.classList.remove("show");
-			createForm.reset();
-		};
-		createCloseBtn.addEventListener("click", closeCreateModal);
-		createCancelBtn.addEventListener("click", closeCreateModal);
-		window.addEventListener("click", e => { if (e.target === createModal) closeCreateModal(); });
-
-			// EDIT MODAL
-			const editModal = document.getElementById("editAdminModal");
-			const editForm = document.getElementById("editAdminForm");
-			const editCloseBtn = editModal.querySelector(".close-btn");
-			const editCancelBtn = editModal.querySelector(".btn-cancel");
-
-			const editButtons = document.querySelectorAll(".icon-btn.edit");
-
-			editButtons.forEach(btn => {
-				btn.addEventListener("click", () => {
-					editModal.classList.add("show");
-					editForm.action = "?handler=Edit";
-
-					// Populate the form fields
-					document.getElementById("EditInput_Id").value = btn.dataset.id;
-					document.getElementById("EditInput_FullName").value = btn.dataset.name;
-					document.getElementById("EditInput_Email").value = btn.dataset.email;
-					document.getElementById("EditInput_Role").value = btn.dataset.role;
-
-					// Debug: log to console
-					console.log("Editing User:");
-					console.log("ID:", btn.dataset.id);
-					console.log("FullName:", btn.dataset.name);
-					console.log("Email:", btn.dataset.email);
-					console.log("Role:", btn.dataset.role);
-				});
-			});
-
-			const closeEditModal = () => {
-				editModal.classList.remove("show");
-				editForm.reset();
-			};
-			editCloseBtn.addEventListener("click", closeEditModal);
-			editCancelBtn.addEventListener("click", closeEditModal);
-			window.addEventListener("click", e => { if (e.target === editModal) closeEditModal(); });
-
-		// DELETE MODAL
-		const deleteModal = document.getElementById("deleteModal");
-		const deleteButtons = document.querySelectorAll(".icon-btn.delete");
-		const cancelDeleteBtn = deleteModal.querySelector(".btn-cancel-delete");
-		const confirmDeleteBtn = deleteModal.querySelector(".btn-delete-confirm");
-		const deleteForm = document.getElementById("deleteForm");
-		const deleteUserIdInput = document.getElementById("deleteUserId");
-
-		let selectedUserId = null;
-
-		deleteButtons.forEach(btn => {
-			btn.addEventListener("click", () => {
-				selectedUserId = btn.dataset.id;
-				deleteModal.classList.add("show");
-			});
-		});
-
-		cancelDeleteBtn.addEventListener("click", () => {
-			deleteModal.classList.remove("show");
-			selectedUserId = null;
-		});
-
-		confirmDeleteBtn.addEventListener("click", () => {
-			if (!selectedUserId) return;
-			deleteUserIdInput.value = selectedUserId;
-			deleteForm.action = "?handler=Delete";
-			deleteForm.submit();
-		});
-
-		window.addEventListener("click", e => {
-			if (e.target === deleteModal) {
-				deleteModal.classList.remove("show");
-				selectedUserId = null;
-			}
-		});
-
-		//Role Filter
-		const searchInput = document.getElementById("searchInput");
-		const roleFilter = document.getElementById("roleFilter");
-		const tableRows = document.querySelectorAll(".user-table tbody tr");
-
-		function filterTable() {
-		const searchTerm = searchInput.value.toLowerCase();
-		const selectedRole = roleFilter.value;
-
-		tableRows.forEach(row => {
-			const name = row.querySelector(".user-name").textContent.toLowerCase();
-
-			// Trim and normalize role text
-			const roleElement = row.querySelector(".role-badge");
-			const role = roleElement ? roleElement.textContent.trim() : "";
-
-			const matchesSearch = name.includes(searchTerm);
-			const matchesRole = selectedRole === "" || role === selectedRole;
-
-			row.style.display = (matchesSearch && matchesRole) ? "" : "none";
-		});
-	}
-
-	searchInput.addEventListener("input", filterTable);
-	roleFilter.addEventListener("change", filterTable);
-
-
-
-
-	//Full Name input
-	const fullNameInput = document.getElementById("Input_FullName");
-	const editFullNameInput = document.getElementById("EditInput_FullName");
-	if (fullNameInput) {
-		fullNameInput.addEventListener("input", function() {
-			// Remove any number or symbol as user types
-			this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
-		});
-	}
-	if (editFullNameInput) {
-		editFullNameInput.addEventListener("input", function() {
-			// Remove any number or symbol as user types
-			this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
-		});
-	}
-	
-
-	});
-</script>
+<script src="~/js/user-management.js" asp-append-version="true"></script>

@@ -162,3 +162,6 @@ select:focus {
 .btn-cancel:hover {
   background: #f8f9fa;
 }
+.text-danger {
+    color:red;
+}

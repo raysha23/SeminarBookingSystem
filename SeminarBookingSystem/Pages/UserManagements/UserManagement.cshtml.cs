@@ -241,13 +241,14 @@ namespace SeminarBookingSystem.Pages.UserManagements
 
             [Required(ErrorMessage = "Full Name is required")]
             [StringLength(50, MinimumLength = 5, ErrorMessage = "Full Name must be between 5 and 50 characters.")]
-            [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessage = "Full Name can only contain letters and spaces.")]
+            [RegularExpression(@"^[A-Za-z]+(?: [A-Za-z]+)+$", ErrorMessage = "Full Name must contain at least two words and letters only.")]
             [Display(Name = "Full Name")]
             public string FullName { get; set; } = string.Empty;
 
             [Required(ErrorMessage = "Email is required")]
             [EmailAddress(ErrorMessage = "Please enter a valid email address")]
-            [Display(Name = "Email Address")]
+            [RegularExpression(@"^[a-zA-Z0-9._%+-]+@gmail\.com$",
+     ErrorMessage = "Only Gmail accounts (example@gmail.com) are allowed.")]
             public string Email { get; set; }
 
             [Required]
@@ -258,13 +259,14 @@ namespace SeminarBookingSystem.Pages.UserManagements
         {
             [Required(ErrorMessage = "Full Name is required")]
             [StringLength(50, MinimumLength = 5, ErrorMessage = "Full Name must be between 5 and 50 characters.")]
-            [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessage = "Full Name can only contain letters and spaces.")]
+            [RegularExpression(@"^[A-Za-z]+(?: [A-Za-z]+)+$", ErrorMessage = "Full Name must contain at least two words and letters only.")]
             [Display(Name = "Full Name")]
             public string FullName { get; set; } = string.Empty;
 
             [Required(ErrorMessage = "Email is required")]
             [EmailAddress(ErrorMessage = "Please enter a valid email address")]
-            [Display(Name = "Email Address")]
+            [RegularExpression(@"^[a-zA-Z0-9._%+-]+@gmail\.com$",
+    ErrorMessage = "Only Gmail accounts (example@gmail.com) are allowed.")]
             public string Email { get; set; }
 
             [Required]
