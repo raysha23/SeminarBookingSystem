@@ -68,8 +68,8 @@
                                     <div class="timestamp-cell">
                                         <i class="bi bi-calendar3"></i>
                                         <div>
-                                            <div class="date">@log.Timestamp.ToString("MMM dd, yyyy")</div>
-                                            <div class="time">@log.Timestamp.ToString("HH:mm:ss")</div>
+                                            <div class="date">@log.Timestamp.ToLocalTime().ToString("MMM dd, yyyy")</div>
+                                            <div class="time">@log.Timestamp.ToLocalTime().ToString("HH:mm:ss")</div>
                                         </div>
                                     </div>
                                 </td>

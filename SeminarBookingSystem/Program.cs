@@ -81,7 +81,7 @@ app.Use(async (context, next) =>
 
     await next();
 });
-
+//"SeminarBookingSystemContextConnection": "Server=(localdb)\\mssqllocaldb;Database=SeminarBookingSystem;Trusted_Connection=True;MultipleActiveResultSets=true"
 // ✅ Map Razor Pages
 app.MapRazorPages();
 

@@ -105,7 +105,7 @@ namespace SeminarBookingSystem.Areas.Identity.Data
                     Action = "Created",
                     Entity = "Seminar",
                     Details = $"Seeded seminar: {s.SeminarTitle} (ID: {s.Id})",
-                    Timestamp = DateTime.Now
+                    Timestamp = DateTime.UtcNow
                 }).ToList();
 
                 await context.ActivityLog.AddRangeAsync(logs);
